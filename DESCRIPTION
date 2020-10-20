@@ -4,8 +4,9 @@ Title: An R interface for dbGAP access data retrieval and analysis
 Version: 0.1.0
 Author: Hoyin Chu, Chris Marcum
 Description: Provides functions to retrieve, analyze and visuialize tables
-from https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi which
-contains meta-information about data access requests made to NCBI's dbGaP (https://www.ncbi.nlm.nih.gov/gap/)
+from https: //www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi which
+contains meta-information about data access requests made to NCBI's dbGaP (https: //www.ncbi.nlm.nih.gov/gap/)
 License: GNU
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 7.1.1
