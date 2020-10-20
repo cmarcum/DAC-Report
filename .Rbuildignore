@@ -1,2 +1,5 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\./icons$
+^\./notebook-examples$
+^\./csv_to_download$

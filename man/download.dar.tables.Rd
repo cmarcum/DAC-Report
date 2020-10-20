@@ -24,12 +24,15 @@ None
 Download all daily data from the specified table within the time range as a csv file
 This function scrapes the data available on the dbGaP Data Access and Use Report page
 (https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi)
+}
+\details{
 table.name is one of table<1-9>, tablea1, tableb1, tablec1, tabled1
 Currently supports scraping: table1,2,6,a1
 No data: 4
 Not currently supported due to malformatted row: 3,5,B1,C1,D1
 Support for 3,7 will come later
 Note: tablea1 is time invariant (same content regardless of start or end date)# Currently Supports: table1,2,6,a1
+
 The example will send 365 requests consecutively, each spaced by 5 seconds, to query table2
 with the date intervals being 01/01/2020-01/02/2020, ..., 12/31/2020-01/01/2021
 and store the result at './data/table2_2020.csv'
