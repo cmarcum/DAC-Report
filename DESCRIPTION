@@ -1,11 +1,11 @@
 Package: DACReportingTool
 Type: Package
-Title: What the Package Does (Title Case)
+Title: An R interface for dbGAP access data retrieval and analysis
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: Hoyin Chu, Chris Marcum
+Description: Provides functions to retrieve, analyze and visuialize tables
+from https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi which
+contains meta-information about data access requests made to NCBI's dbGaP (https://www.ncbi.nlm.nih.gov/gap/)
+License: GNU
 Encoding: UTF-8
 LazyData: true
