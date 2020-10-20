@@ -16,6 +16,6 @@
 #' formatTableRequestUrl('table2','01/01/2020','10/20/2020')
 formatTableRequestUrl <- function(table.name,start.date,end.date) {
   base.url <- "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?stDate=%s&endDate=%s&retTable=%s"
-  request.url <- sprintf(base.url, URLencode(start.date,reserved = TRUE), URLencode(end.date,reserved = TRUE), table.name)
+  request.url <- sprintf(base.url, utils::URLencode(start.date,reserved = TRUE), utils::URLencode(end.date,reserved = TRUE), table.name)
   return(request.url)
 }
