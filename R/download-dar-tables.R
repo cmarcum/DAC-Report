@@ -13,12 +13,8 @@ format.table.request.url <- function(table.name,start.date,end.date) {
 #' This function scrapes the data available on the dbGaP Data Access and Use Report page
 #' (https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi)
 #'
-#' table.name is one of table<1-9>, tablea1, tableb1, tablec1, tabled1
-#' Currently supports scraping: table1,2,6,a1
-#' No data: 4
-#' Not currently supported due to malformatted row: 3,5,B1,C1,D1
-#' Support for 3,7 will come later
-#' Note: tablea1 is time invariant (same content regardless of start or end date)# Currently Supports: table1,2,6,a1
+#' table.name is one of table<1-9>, tablea1, tableb1, tablec1, tabled1.
+#' Currently supports scraping table1,2,6,a1. Note that tablea1 is time invariant (same content regardless of start or end date)
 #'
 #' The example will send 365 requests consecutively, each spaced by 5 seconds, to query table2
 #' with the date intervals being 01/01/2020-01/02/2020, ..., 12/31/2020-01/01/2021
@@ -184,5 +180,19 @@ get.multi.row.span.table <- function(table.url,xpath){
     }
   }
   return(table)
+}
+
+# Given the csv file containing the table information, update it so that it has the latest information
+update.table.csv <- function(table.name,file.path,update.to.date=Sys.Date(),wait.for=5){
+  cur.df <- read.csv(file.path)
+  latest.date <- max(as.Date(cur.df$Date,"%m/%d/%Y"), na.rm = TRUE)
+  if(latest.date >= update.to.date) {
+    stop('The table is already up to date!')
+  }
+  df.list <- get.table.from.time(table.name,latest.date,update.to.date,wait.for)
+  df.to.add <- data.table::rbindlist(df.list)
+  big.df <- rbind(cur.df,df.to.add)
+  write.csv(big.df,file.path,row.names = FALSE)
+  print('Table updated')
 }
 
