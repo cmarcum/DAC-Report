@@ -7,135 +7,6 @@ format.table.request.url <- function(table.name,start.date,end.date) {
   return(request.url)
 }
 
-#' Download DAR Tables
-#'
-#' Download all daily data from the specified table within the time range as a csv file
-#' This function scrapes the data available on the dbGaP Data Access and Use Report page
-#' (https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi)
-#'
-#' table.name is one of table<1-9>, tablea1, tableb1, tablec1, tabled1.
-#' Currently supports scraping table1,2,6,a1. Note that tablea1 is time invariant (same content regardless of start or end date)
-#'
-#' The example will send 365 requests consecutively, each spaced by 5 seconds, to query table2
-#' with the date intervals being 01/01/2020-01/02/2020, ..., 12/31/2020-01/01/2021
-#' and store the result at './data/table2_2020.csv'
-#'
-#' @param table.name String, name of the table to query from
-#' @param start.date String, the date to start scraping in mm/dd/yyyy format
-#' @param end.date String, the date to end scraping in mm/dd/yyyy format
-#' @param directory String, the path (file name included) in which the scraped data should be stored
-#' @param wait.for integer, how many seconds to wait before sending another request to the server
-#'
-#' @return None
-#'
-#' @examples
-#' \dontrun{
-#' download.dar.tables('table2','01/01/2020','12/31/2020','./data/table2_2020.csv',5)
-#' }
-#' @export
-download.dar.tables <- function(table.name,start.date,end.date,directory,wait.for=5) {
-  if (table.name == 'tablea1') {
-    table.a1.url <- format.table.request.url(table.name,start.date,end.date)
-    table.a1.xpath <- "//tr"
-    big.df <- get.multi.row.span.table(table.a1.url,table.a1.xpath)
-    names(big.df) <- big.df[1,]
-    big.df <- big.df[-1,]
-  }
-  else {
-    df.list <- get.table.from.time(table.name,start.date,end.date,wait.for)
-    big.df <- data.table::rbindlist(df.list)
-  }
-  utils::write.csv(big.df,directory,row.names = FALSE)
-}
-
-# Helper function, fetches the table as a dataframe parsed by htmltab
-fetch.dar.table <- function(table.name,start.date,end.date) {
-  request.url <- format.table.request.url(table.name,start.date,end.date)
-  print(sprintf("Sending request for %s from %s to %s...",table.name,start.date,end.date))
-  #lines <- rvest::html_nodes(xml2::read_html(request.url),xpath="//tr/ancestor::table")
-  # get the lines of the table
-  # lines <- request.url %>%
-  #   read_html() %>%
-  #   html_nodes(xpath="//tr")
-  #
-  # html.tab.table <- htmltab::htmltab(doc = lines)
-  # return(html.tab.table)
-  html.tab.table <- htmltab::htmltab(doc = request.url, which = "//tr/ancestor::table")
-  return(html.tab.table)
-}
-
-# Helper function, cleans up the fetched table by converting non-utf-8 characters to NA
-# and changing column names
-clean.dar.table <- function(table.name,html.tab.table) {
-  html.tab.table.numeric <- dplyr::mutate_all(html.tab.table, function(x) as.numeric(as.character(x)))
-  html.tab.table.numeric$DAC <- html.tab.table$DAC
-  html.tab.table.numeric <- as.data.frame(html.tab.table.numeric)
-  if (table.name == 'table1') {
-    table1.top.col.names <- c('DAR','Project','PI')
-    table1.sub.col.names <- c('Total.Submitted','Approved','Disapproved','Revision.Requested','In.Process')
-    table1.expanded.col.names <- as.vector(t(outer(table1.top.col.names,table1.sub.col.names,paste,sep="_")))
-    colnames(html.tab.table.numeric) <- c('DAC',table1.expanded.col.names)
-  }
-  else if (table.name == 'table2') {
-    table2.top.col.names <- c('PI.Request.to.SO.Approval',
-                              'SO.Approval.to.DAC.Claim',
-                              'DAC.Claim.to.DAC.Approval',
-                              'DAC.Claim.to.DAC.Reject',
-                              'DAC.Claim.to.DAC.Revision',
-                              'Total.Time.for.DAC.Processing')
-    table2.sub.col.names <- c('Min','Max','Average')
-    table2.expanded.col.names <- as.vector(t(outer(table2.top.col.names,table2.sub.col.names,paste,sep="_")))
-    colnames(html.tab.table.numeric) <- c('DAC',table2.expanded.col.names)
-  }
-  return(html.tab.table.numeric)
-}
-
-# Returns the specified table with data specified within the time range.
-# Nested header names are prepended with >> as separator
-get.dar.table <- function(table.name,start.date,end.date){
-  htmltab.table <- fetch.dar.table(table.name,start.date,end.date)
-  cleaned.table <- clean.dar.table(table.name,htmltab.table)
-  return(cleaned.table)
-}
-
-# Given time range and table name, return a list of dataframe with all DAC activities within that timeframe, daily
-get.table.from.time <- function(table.name,start.date,end.date,wait.for=5) {
-  start.date.as.date <- as.Date(start.date, "%m/%d/%Y")
-  end.date.as.date <- as.Date(end.date, "%m/%d/%Y")
-  date.seq <- seq(start.date.as.date,end.date.as.date, by = "day")
-  df.list = list()
-  for (i in 1:length(date.seq)) {
-    cur.table <- get.dar.table(table.name,format(date.seq[[i]], "%m/%d/%Y"),format(date.seq[[i]]+1, "%m/%d/%Y"))
-    cur.table$Date <- format(date.seq[[i]], "%m/%d/%Y")
-    df.list[[i]] <- cur.table
-    Sys.sleep(wait.for)
-  }
-  return(df.list)
-}
-
-# Helper function, reads a list of dataframes from given directory
-# If first.col.as.row.names is true, the first column of the dataframe is converted to rownames
-read.df.list.from <- function(directory,first.col.as.row.names=FALSE) {
-  temp = list.files(path=directory,pattern="*.csv",full.names = TRUE)
-  df.list = lapply(temp, utils::read.csv)
-  if (first.col.as.row.names) {
-    df.list <- lapply(df.list, function(df) {
-      df.alt <- df[,-1]
-      rownames(df.alt) <- df[,1]
-      return(df.alt)
-    })
-  }
-  return(df.list)
-}
-
-# Helper function, given a directory of csv with same columns, combine them into one csv and write it to the given directory
-combine.csv.and.write.to <- function(read.directory.name,write.file.name){
-  df.list <- read.df.list.from(read.directory.name)
-  big.df <- data.table::rbindlist(df.list)
-  utils::write.csv(big.df,write.file.name,row.names = FALSE)
-}
-
-
 # Reference: https://stackoverflow.com/questions/57279093/rvest-read-table-with-cells-that-span-multiple-rows
 # Parse a table with cells that span more than one row given url and xpath
 get.multi.row.span.table <- function(table.url,xpath){
@@ -182,17 +53,66 @@ get.multi.row.span.table <- function(table.url,xpath){
   return(table)
 }
 
-# Given the csv file containing the table information, update it so that it has the latest information
-update.table.csv <- function(table.name,file.path,update.to.date=Sys.Date(),wait.for=5){
-  cur.df <- read.csv(file.path)
-  latest.date <- max(as.Date(cur.df$Date,"%m/%d/%Y"), na.rm = TRUE)
-  if(latest.date >= update.to.date) {
-    stop('The table is already up to date!')
-  }
-  df.list <- get.table.from.time(table.name,latest.date,update.to.date,wait.for)
-  df.to.add <- data.table::rbindlist(df.list)
-  big.df <- rbind(cur.df,df.to.add)
-  write.csv(big.df,file.path,row.names = FALSE)
-  print('Table updated')
+# Retrieve the review timeline table
+get.review.timeline.table <-function(dac.name,start.date,end.date) {
+  table.url <- "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?DAC=%s&diff=tot&stat=max&stDate=%s&endDate=%s"
+  request.url <- sprintf(table.url,utils::URLencode(dac.name,reserved = TRUE), utils::URLencode(start.date,reserved = TRUE), utils::URLencode(end.date,reserved = TRUE))
+  big.df <- request.url %>%
+    xml2::read_html() %>%
+    rvest::html_nodes(xpath='/html/body/table') %>%
+    rvest::html_table(fill = TRUE)
+  big.df <- big.df[[1]][-1,]
+  #big.df <- get.multi.row.span.table(request.url,"/html/body/table")
+  return(big.df)
 }
 
+# Retrieve Table A1: List of All NIH DAC Studies table
+get.list.of.all.nih.dac.studies.table <- function(start.date,end.date) {
+  table.url <- format.table.request.url('tablea1',start.date,end.date)
+  big.df <- get.multi.row.span.table(table.url,'//tr')
+  names(big.df) <- big.df[1,]
+  big.df <- big.df[-1,]
+  return(big.df)
+}
+
+# Removes any non-ascii characters from the given dataframe
+remove.non.ascii.from.df <-function(df) {
+  return(data.frame(lapply(df, iconv, from="latin1",to="ASCII",sub="")))
+}
+
+# Fetch and parse the table
+get.all.dac.action.table <- function(start.date,end.date) {
+  table.url <- "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?DAC=all&actType=all&stDate=%s&endDate=%s"
+  request.url <- sprintf(table.url,utils::URLencode(start.date,reserved = TRUE), utils::URLencode(end.date,reserved = TRUE))
+  print(sprintf("Sending request for DAC action table from %s to %s...",start.date,end.date))
+  big.df <- get.multi.row.span.table(request.url,"//tr")
+  # Use first row as column headers
+  names(big.df) <- big.df[1,]
+  big.df <- big.df[-1,]
+  return(big.df)
+}
+
+# Update table to the date given (system date to default)
+update.dac.action.table <- function(update.to=format(Sys.Date(),"%m/%d/%Y"),overwrite=TRUE,return.table=FALSE) {
+  update.to <- as.Date(update.to,"%m/%d/%Y")
+  # Loads the latest nih dac action table into the session
+  load('./data/nih_dac_action_table.rda')
+  converted.date <- as.POSIXct(nih_dac_action_table[,'Approved by DAC'], format="%m/%d/%Y %H:%M", tz="EST")
+  # Use the latest date in the approved by dac column as the last updated date
+  cur.table.latest <- as.Date(max(converted.date ,na.rm = TRUE))
+  if (cur.table.latest >= update.to) {
+    stop('The table is already updated to the specified date!')
+  }
+  # Get table starting from latest date, append to current table
+  new.table <- get.all.dac.action.table(format(cur.table.latest,"%m/%d/%Y"),format(update.to,"%m/%d/%Y"))
+  combined.table <- dplyr::bind_rows(nih_dac_action_table,new.table)
+  # Drop rows with same DAR (only keep the latest one)
+  combined.table <- combined.table[!duplicated(combined.table$DAR, fromLast=T),]
+  nih_dac_action_table <- combined.table
+  if (overwrite) {
+    save(nih_dac_action_table,file = "./data/nih_dac_action_table.rda")
+  }
+  if (return.table) {
+    return(nih_dac_action_table)
+  }
+}
