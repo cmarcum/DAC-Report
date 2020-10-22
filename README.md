@@ -8,11 +8,4 @@ Currently we use the [dbGaP Data Access and Use Report page](https://www.ncbi.nl
 * Automate typical analysis on csv file
 
 # Workflow
-Suppose we want to analyze requests data made to dbGaP from 2017 to 2019, we would:
-1. Download the table containing the desired data from the desired time range by calling `download.dar.tables`
-```r
-download.dar.tables('table1','01/01/2017','12/31/2019','./data/table1_2017-2019.csv')
-```
-Alternatively, just download it from this github under csv_to_download
-
-2. Use functions provided in the package to explore the dataset!
+To retrieve the latest data (from the beginning of time to 10/22/2020), simply load the rda files stored in `/data` by using `load()`!
