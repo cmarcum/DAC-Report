@@ -1,12 +1,5 @@
 #' @importFrom magrittr "%>%"
 
-# Helper function, formats the given parameters as a request url
-format.table.request.url <- function(table.name,start.date,end.date) {
-  base.url <- "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?stDate=%s&endDate=%s&retTable=%s"
-  request.url <- sprintf(base.url, utils::URLencode(start.date,reserved = TRUE), utils::URLencode(end.date,reserved = TRUE), table.name)
-  return(request.url)
-}
-
 # Reference: https://stackoverflow.com/questions/57279093/rvest-read-table-with-cells-that-span-multiple-rows
 # Parse a table with cells that span more than one row given url and xpath
 get.multi.row.span.table <- function(table.url,xpath){
@@ -53,34 +46,18 @@ get.multi.row.span.table <- function(table.url,xpath){
   return(table)
 }
 
-# Retrieve the review timeline table
-get.review.timeline.table <-function(dac.name,start.date,end.date) {
-  table.url <- "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?DAC=%s&diff=tot&stat=max&stDate=%s&endDate=%s"
-  request.url <- sprintf(table.url,utils::URLencode(dac.name,reserved = TRUE), utils::URLencode(start.date,reserved = TRUE), utils::URLencode(end.date,reserved = TRUE))
-  big.df <- request.url %>%
-    xml2::read_html() %>%
-    rvest::html_nodes(xpath='/html/body/table') %>%
-    rvest::html_table(fill = TRUE)
-  big.df <- big.df[[1]][-1,]
-  #big.df <- get.multi.row.span.table(request.url,"/html/body/table")
-  return(big.df)
-}
-
-# Retrieve Table A1: List of All NIH DAC Studies table
-get.list.of.all.nih.dac.studies.table <- function(start.date,end.date) {
-  table.url <- format.table.request.url('tablea1',start.date,end.date)
-  big.df <- get.multi.row.span.table(table.url,'//tr')
-  names(big.df) <- big.df[1,]
-  big.df <- big.df[-1,]
-  return(big.df)
-}
-
-# Removes any non-ascii characters from the given dataframe
-remove.non.ascii.from.df <-function(df) {
-  return(data.frame(lapply(df, iconv, from="latin1",to="ASCII",sub="")))
-}
-
-# Fetch and parse the table
+#' Get all DAC action table
+#'
+#' @param start.date String, date in "mm/dd/yyyy" format
+#' @param end.date String, date in "mm/dd/yyyy" format
+#'
+#' @return Dataframe containing all DAC actions performed within the specified time range
+#'
+#' @examples \dontrun{
+#' get.all.dac.action.table('01/01/2015','12/31/2020')
+#' }
+#'
+#' @export
 get.all.dac.action.table <- function(start.date,end.date) {
   table.url <- "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?DAC=all&actType=all&stDate=%s&endDate=%s"
   request.url <- sprintf(table.url,utils::URLencode(start.date,reserved = TRUE), utils::URLencode(end.date,reserved = TRUE))
@@ -92,7 +69,21 @@ get.all.dac.action.table <- function(start.date,end.date) {
   return(big.df)
 }
 
-# Update table to the date given (system date to default)
+#' Updating the DAC action table
+#'
+#' Call this function to update the existing DAC action table data so it has the latest data
+#'
+#' @param update.to String, date in"mm/dd/yyyy" format, by default it's the system date (today)
+#' @param overwrite logical, whether the updated table should overwrite the previously saved table, TRUE by default
+#' @param return.table logical, whether the function should return the updated table, FALSE by default
+#'
+#' @return (optionally) the updated table
+#'
+#' @examples \dontrun{
+#' update.dac.action.table()
+#' }
+#'
+#' @export
 update.dac.action.table <- function(update.to=format(Sys.Date(),"%m/%d/%Y"),overwrite=TRUE,return.table=FALSE) {
   update.to <- as.Date(update.to,"%m/%d/%Y")
   # Loads the latest nih dac action table into the session
@@ -106,7 +97,7 @@ update.dac.action.table <- function(update.to=format(Sys.Date(),"%m/%d/%Y"),over
   # Get table starting from latest date, append to current table
   new.table <- get.all.dac.action.table(format(cur.table.latest,"%m/%d/%Y"),format(update.to,"%m/%d/%Y"))
   combined.table <- dplyr::bind_rows(nih_dac_action_table,new.table)
-  # Drop rows with same DAR (only keep the latest one)
+  # Drop rows with same DAR id (only keep the latest one)
   combined.table <- combined.table[!duplicated(combined.table$DAR, fromLast=T),]
   nih_dac_action_table <- combined.table
   if (overwrite) {
