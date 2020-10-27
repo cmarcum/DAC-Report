@@ -54,7 +54,14 @@ get.multi.row.span.table <- function(table.url,xpath){
 #' @return Dataframe containing all DAC actions performed within the specified time range
 #'
 #' @examples \dontrun{
-#' get.all.dac.action.table('01/01/2015','12/31/2020')
+#' > get.all.dac.action.table('09/01/2020','10/01/2020')
+#'      DAC    PI Project       DAR  Study accesion  Submitted by PI   Approved by SO  Approved by DAC  Rejected by DAC Revision requested by DAC         Data downloaded
+#' 2    CDAC   563     501  65316.v4 phs000688.v1.p1 09/07/2020 07:22 09/18/2020 16:17 09/18/2020 16:50                                                                 no
+#' 3    CDAC   563   11888  74027.v3 phs000688.v1.p1 09/09/2020 09:31 09/10/2020 06:56 09/18/2020 16:49                                                                 no
+#' 4    CDAC  1280     849  73340.v3 phs000688.v1.p1 08/28/2020 11:46 09/01/2020 15:00 09/04/2020 13:57                                            yes in previous version
+#' 5    CDAC  2418    1395  85271.v3 phs000688.v1.p1 09/02/2020 14:55 09/02/2020 17:23 09/04/2020 13:58                                                                 no
+#' 6    CDAC  3464    1955  48719.v9 phs000688.v1.p1 09/21/2020 15:05 09/22/2020 12:20 09/28/2020 10:37                                                                 no
+#' ......
 #' }
 #'
 #' @export
