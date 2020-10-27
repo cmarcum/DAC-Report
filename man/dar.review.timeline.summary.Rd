@@ -29,7 +29,6 @@ dataframe
 }
 \description{
 Returns a summary dataframe of all DAC which had DAR approved in the given timeframe
-.
 }
 \examples{
 \dontrun{

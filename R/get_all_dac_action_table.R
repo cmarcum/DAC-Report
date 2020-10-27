@@ -114,3 +114,14 @@ update.dac.action.table <- function(update.to=format(Sys.Date(),"%m/%d/%Y"),over
     return(nih_dac_action_table)
   }
 }
+
+get.all.nih.dac.studies.table <- function(start.date,end.date) {
+  table.url <- "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?stDate=%s&endDate=%s&retTable=tablea1"
+  request.url <- sprintf(table.url,utils::URLencode(start.date,reserved = TRUE), utils::URLencode(end.date,reserved = TRUE))
+  print(sprintf("Sending request for All NIH DAC Studies (tablea1) table from %s to %s...",start.date,end.date))
+  big.df <- get.multi.row.span.table(request.url,"//tr")
+  # Use first row as column headers
+  names(big.df) <- big.df[1,]
+  big.df <- big.df[-1,]
+  return(big.df)
+}
