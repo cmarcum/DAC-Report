@@ -163,7 +163,7 @@ get.study.summary.table <- function(df,start.date = '2000-01-01',end.date=format
 
   # Merge with all DAC studies table
   print("Merging with all DAC studies table...")
-  big.table <- merge(summary.df,all_nih_?dac_studies_table, by.x='StudyAccesion', by.y='Study Accession',all.x=TRUE)
+  big.table <- merge(summary.df,all_nih_dac_studies_table, by.x='StudyAccesion', by.y='Study Accession',all.x=TRUE)
 
   return(big.table)
 }

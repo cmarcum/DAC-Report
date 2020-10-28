@@ -67,13 +67,10 @@ get.multi.row.span.table <- function(table.url,xpath){
 #' @export
 get.all.dac.action.table <- function(start.date,end.date) {
   table.url <- "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?DAC=all&actType=all&stDate=%s&endDate=%s"
+  table.xpath <- "//tr"
   request.url <- sprintf(table.url,utils::URLencode(start.date,reserved = TRUE), utils::URLencode(end.date,reserved = TRUE))
   print(sprintf("Sending request for DAC action table from %s to %s...",start.date,end.date))
-  big.df <- get.multi.row.span.table(request.url,"//tr")
-  # Use first row as column headers
-  names(big.df) <- big.df[1,]
-  big.df <- big.df[-1,]
-  return(big.df)
+  return(get.data.use.summary.table(request.url,table.xpath))
 }
 
 #' Updating the DAC action table
@@ -117,11 +114,28 @@ update.dac.action.table <- function(update.to=format(Sys.Date(),"%m/%d/%Y"),over
 
 get.all.nih.dac.studies.table <- function(start.date,end.date) {
   table.url <- "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?stDate=%s&endDate=%s&retTable=tablea1"
+  table.xpath <- "//tr"
   request.url <- sprintf(table.url,utils::URLencode(start.date,reserved = TRUE), utils::URLencode(end.date,reserved = TRUE))
   print(sprintf("Sending request for All NIH DAC Studies (tablea1) table from %s to %s...",start.date,end.date))
-  big.df <- get.multi.row.span.table(request.url,"//tr")
+  return(get.data.use.summary.table(request.url,table.xpath))
+}
+
+# Note: This retrieves all DARs approed by SO within the time range
+get.submitted.dar.by.dac <- function(dac.name,start.date,end.date) {
+  table.url <- "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?DAC=%s&diff=tot&stat=avg&stDate=%s&endDate=%s"
+  table.xpath <- "//tr[not(position()=2)]"
+  request.url <- sprintf(table.url,utils::URLencode(dac.name,reserved = TRUE),utils::URLencode(start.date,reserved = TRUE), utils::URLencode(end.date,reserved = TRUE))
+  print(sprintf("Sending request for DARs submitted by %s from %s to %s...",dac.name,start.date,end.date))
+  return(get.data.use.summary.table(request.url,table.xpath))
+}
+
+# Helper functions that grabs tables from the DataUseSummary.cgi page
+get.data.use.summary.table <- function(request.url,table.xpath) {
+  big.df <- get.multi.row.span.table(request.url,table.xpath)
   # Use first row as column headers
   names(big.df) <- big.df[1,]
   big.df <- big.df[-1,]
   return(big.df)
 }
+
+
