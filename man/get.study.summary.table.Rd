@@ -22,17 +22,17 @@ A data frame with 12 variables:
 }
 \usage{
 get.study.summary.table(
-  df,
   start.date = "2000-01-01",
-  end.date = format(Sys.Date())
+  end.date = format(Sys.Date()),
+  df = nih_dac_action_table
 )
 }
 \arguments{
-\item{df}{the dataframe to be analyzed, this should be the nih_dac_action_table dataframe}
-
 \item{start.date}{String, date in "yyyy-mm-dd" format}
 
 \item{end.date}{String, date in "yyyy-mm-dd" format}
+
+\item{df}{optional, the dataframe to be analyzed, by default it is the nih_dac_action_table dataframe}
 }
 \value{
 dataframe
@@ -43,7 +43,7 @@ can be both approved and rejected (ex. approved but later rejected ), or neither
 }
 \examples{
 \dontrun{
-> get.study.summary.table(nih_dac_action_table,"2020-01-01","2020-10-15")
+> get.study.summary.table("2020-01-01","2020-10-15")
        StudyAccesion TotalRequest TotalApproved TotalRejected TotalDownload AvgApprovalTime ...
 1    phs000001.v3.p1          106            94             5            59       31.205245 ...
 2  phs000007.v31.p12          440           312           133           228       17.452357 ...

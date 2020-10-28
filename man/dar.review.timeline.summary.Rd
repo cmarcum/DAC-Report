@@ -15,14 +15,14 @@ A data frame with 6 variables:
 }
 }
 \usage{
-dar.review.timeline.summary(df, start.date, end.date)
+dar.review.timeline.summary(start.date, end.date, df = nih_dac_action_table)
 }
 \arguments{
-\item{df}{the dataframe to be analyzed, this should be the nih_dac_action_table dataframe}
-
-\item{start.date}{String, date in "yyyy-mm-dd" format,}
+\item{start.date}{String, date in "yyyy-mm-dd" format}
 
 \item{end.date}{String, date in "yyyy-mm-dd" format}
+
+\item{df}{optional, the dataframe to be analyzed, by default it is the nih_dac_action_table dataframe}
 }
 \value{
 dataframe
@@ -32,7 +32,7 @@ Returns a summary dataframe of all DAC which had DAR approved in the given timef
 }
 \examples{
 \dontrun{
-> dar.review.timeline.summary(nih_dac_action_table,"2020-01-01","2020-10-15")
+> dar.review.timeline.summary("2020-01-01","2020-10-15",df=nih_dac_action_table)
               DAC AvgApprovalTime MedApprovalTime DARDailyAvg DARDailySD DARTotal
 1            CDAC  14.916372 days  11.356944 days  0.66782007  2.5414008      193
 2          ES DAC  24.247849 days  12.220139 days  0.21453287  0.7788412       62

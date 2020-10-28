@@ -45,8 +45,8 @@ dar.review.timeline.summary <- function(start.date,end.date,df=nih_dac_action_ta
   approved.df <- get.df.within.range(df,start.date,end.date,date.col="Approved by DAC")
   approved.df["time_from_PI_submission_to_DAC_approval"] <- difftime(to.time(approved.df[,"Approved by DAC"]), to.time(approved.df[,"Submitted by PI"]),units = "days")
 
-  avg.approval.days <- aggregate(approved.df["time_from_PI_submission_to_DAC_approval"], by=list(DAC=approved.df$DAC), FUN=mean)
-  med.approval.days <- aggregate(approved.df["time_from_PI_submission_to_DAC_approval"], by=list(DAC=approved.df$DAC), FUN=median)
+  avg.approval.days <- stats::aggregate(approved.df["time_from_PI_submission_to_DAC_approval"], by=list(DAC=approved.df$DAC), FUN=mean)
+  med.approval.days <- stats::aggregate(approved.df["time_from_PI_submission_to_DAC_approval"], by=list(DAC=approved.df$DAC), FUN=stats::median)
 
   summary.df <- avg.approval.days
   summary.df['time_from_PI_submission_to_DAC_approval'] <- NULL
@@ -60,7 +60,7 @@ dar.review.timeline.summary <- function(start.date,end.date,df=nih_dac_action_ta
   }
 
   summary.df['DARDailyAvg'] <- unlist(lapply(daily.vector.list,mean))
-  summary.df['DARDailySD'] <- unlist(lapply(daily.vector.list,sd))
+  summary.df['DARDailySD'] <- unlist(lapply(daily.vector.list,stats::sd))
   summary.df['DARTotal'] <- unlist(lapply(daily.vector.list,sum))
 
   return(summary.df)
