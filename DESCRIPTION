@@ -1,6 +1,6 @@
 Package: DACReportingTool
 Type: Package
-Title: An R interface for dbGAP access data retrieval and analysis
+Title: An R interface for dbGAP Data Access Committee activity data and analysis
 Version: 0.1.0
 Author: Hoyin Chu, Chris Marcum
 Maintainer: Hoyin Chu <hoyin.chu@nih.gov>
