@@ -13,14 +13,14 @@
 #'   \item{DARTotal}{The total number of DAR submitted in the given timeframe}
 #' }
 #'
-#' @param df the dataframe to be analyzed, this should be the nih_dac_action_table dataframe
-#' @param start.date String, date in "yyyy-mm-dd" format,
+#' @param start.date String, date in "yyyy-mm-dd" format
 #' @param end.date String, date in "yyyy-mm-dd" format
+#' @param df optional, the dataframe to be analyzed, by default it is the nih_dac_action_table dataframe
 #'
 #' @return dataframe
 #'
 #' @examples \dontrun{
-#' > dar.review.timeline.summary(nih_dac_action_table,"2020-01-01","2020-10-15")
+#' > dar.review.timeline.summary("2020-01-01","2020-10-15",df=nih_dac_action_table)
 #'               DAC AvgApprovalTime MedApprovalTime DARDailyAvg DARDailySD DARTotal
 #' 1            CDAC  14.916372 days  11.356944 days  0.66782007  2.5414008      193
 #' 2          ES DAC  24.247849 days  12.220139 days  0.21453287  0.7788412       62
@@ -41,7 +41,7 @@
 #' }
 #'
 #' @export
-dar.review.timeline.summary <- function(df,start.date,end.date) {
+dar.review.timeline.summary <- function(start.date,end.date,df=nih_dac_action_table) {
   approved.df <- get.df.within.range(df,start.date,end.date,date.col="Approved by DAC")
   approved.df["time_from_PI_submission_to_DAC_approval"] <- difftime(to.time(approved.df[,"Approved by DAC"]), to.time(approved.df[,"Submitted by PI"]),units = "days")
 
@@ -67,7 +67,7 @@ dar.review.timeline.summary <- function(df,start.date,end.date) {
 }
 
 # returns a vector of length (start.date - end.date) where each element = DAR report sent that day
-get.dac.daily.approved.dar.vector <- function(df,dac.name,start.date,end.date) {
+get.dac.daily.approved.dar.vector <- function(dac.name,start.date,end.date,df=nih_dac_action_table) {
   dac.df <- df[df['DAC'] == dac.name,]
   approved.df <- get.df.within.range(dac.df,start.date,end.date,date.col="Approved by DAC")
   dac.avg.time <- difftime(to.time(approved.df[,"Approved by DAC"]), to.time(approved.df[,"Submitted by PI"]),units = "days")
@@ -96,9 +96,9 @@ to.time <- function(col) {
 #' Returns a summary dataframe of all studies made in the given timeframe. Note that some studies
 #' can be both approved and rejected (ex. approved but later rejected ), or neither (still in process of approval)
 #'
-#' @param df the dataframe to be analyzed, this should be the nih_dac_action_table dataframe
 #' @param start.date String, date in "yyyy-mm-dd" format
 #' @param end.date String, date in "yyyy-mm-dd" format
+#' @param df optional, the dataframe to be analyzed, by default it is the nih_dac_action_table dataframe
 #'
 #' @format A data frame with 12 variables:
 #' \describe{
@@ -119,7 +119,7 @@ to.time <- function(col) {
 #' @return dataframe
 #'
 #' @examples \dontrun{
-#' > get.study.summary.table(nih_dac_action_table,"2020-01-01","2020-10-15")
+#' > get.study.summary.table("2020-01-01","2020-10-15")
 #'        StudyAccesion TotalRequest TotalApproved TotalRejected TotalDownload AvgApprovalTime ...
 #' 1    phs000001.v3.p1          106            94             5            59       31.205245 ...
 #' 2  phs000007.v31.p12          440           312           133           228       17.452357 ...
@@ -135,7 +135,7 @@ to.time <- function(col) {
 #'}
 #'
 #' @export
-get.study.summary.table <- function(df,start.date = '2000-01-01',end.date=format(Sys.Date())) {
+get.study.summary.table <- function(start.date = '2000-01-01',end.date=format(Sys.Date()), df=nih_dac_action_table) {
   submitted.df <- get.df.within.range(df,start.date,end.date,date.col="Submitted by PI")
   all.studies <- unique(submitted.df[,'Study accesion'])
   print('Calculating stats for every study...')
