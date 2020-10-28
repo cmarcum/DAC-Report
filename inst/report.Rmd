@@ -1,0 +1,12 @@
+---
+output: pdf_document
+--- 
+
+```{r}
+title_var <- "Sample Title"
+```
+
+---
+title: `r title_var`
+---
+
