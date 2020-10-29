@@ -1,12 +1,25 @@
 ---
-output: pdf_document
+output: 
+ bookdown::word_document2: default
 --- 
 
-```{r}
-title_var <- "Sample Title"
+---
+title: `r params$title`
+author: `r params$author`
+date: `r format(Sys.time(), '%d %B, %Y')`
+---
+
+The `r params$dac` Data Access Committee (DAC) currently manages `r total.number.of.dars` data access requests (DARs) for access to `r total.number.of.projects` projects in dbGaP.  
+
+# Data Access Requests
+Between `r params$start.date` and `r params$end.date` the DAC reviewed `r num.dars.in.window` DARs. Of these, `r number.of.accepted` were accepted while `r number.of.rejected` were rejected.  The average amount of time from when the Principle Investigator (PI) submited a DAR to the final decision by the DAC was `r avg.final` days.  The average time to an accepted decision was `r avg.accept` days, while the average time to a rejected decision was `r avg.reject` days.  Figure \@ref(fig:compline) is a barplot comparing the `r params$dac` DAC to time to final decision to the average across all NIH DACs during the same time interval.  
+
+```{r compline, fig.cap="Comparison of Time to Final Decision", echo=FALSE}
+par(mar = c(4, 4, .2, .1))
+plot(1:4) #call data and plot here
 ```
 
----
-title: `r title_var`
----
+# Study Registrations
 
+
+This report was prepared using the DACReportingTool package for R, build `r packageVersion("snow")` by Mr. Hoyin Chu and Dr. Christopher Steven Marcum. 
