@@ -120,7 +120,7 @@ get.all.nih.dac.studies.table <- function(start.date,end.date) {
   return(get.data.use.summary.table(request.url,table.xpath))
 }
 
-# Note: This retrieves all DARs approed by SO within the time range
+# Note: This retrieves all DARs approved by SO within the time range
 get.submitted.dar.by.dac <- function(dac.name,start.date,end.date) {
   table.url <- "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?DAC=%s&diff=tot&stat=avg&stDate=%s&endDate=%s"
   table.xpath <- "//tr[not(position()=2)]"

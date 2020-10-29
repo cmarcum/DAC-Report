@@ -1,7 +1,7 @@
 
 #' DAR Review Timeline Summary
 #'
-#' Returns a summary dataframe of all DAC which had DAR approved in the given timeframe
+#' Returns a summary dataframe of all DAC which had DAR submitted in the given timeframe
 #'
 #' @format A data frame with 6 variables:
 #' \describe{
@@ -42,26 +42,54 @@
 #'
 #' @export
 dar.review.timeline.summary <- function(start.date,end.date,df=nih_dac_action_table) {
-  approved.df <- get.df.within.range(df,start.date,end.date,date.col="Approved by DAC")
-  approved.df["time_from_PI_submission_to_DAC_approval"] <- difftime(to.time(approved.df[,"Approved by DAC"]), to.time(approved.df[,"Submitted by PI"]),units = "days")
+  submitted.df <- get.df.within.range(df,start.date,end.date,date.col="Submitted by PI")
+  submitted.df["time_from_PI_submission_to_DAC_approval"] <- difftime(to.time(submitted.df[,"Approved by DAC"]), to.time(submitted.df[,"Submitted by PI"]),units = "days")
+  submitted.df["time_from_PI_submission_to_DAC_rejection"] <- difftime(to.time(submitted.df[,"Rejected by DAC"]), to.time(submitted.df[,"Submitted by PI"]),units = "days")
+  total.submitted.count.df <- dplyr::count(submitted.df,DAC, name="TotalRequests")
+  # colnames(total.submitted.count.df)[colnames(total.submitted.count.df) == 'n'] <- 'TotalRequests'
+  total.downloaded.df <- stats::aggregate(submitted.df["Data downloaded"], by=list(DAC=submitted.df$DAC), FUN=function(x){length(which(x=='yes'))})
+  colnames(total.downloaded.df)[colnames(total.downloaded.df) == 'Data downloaded'] <- 'Downloaded'
+  previously.downloaded.df <- stats::aggregate(submitted.df["Data downloaded"], by=list(DAC=submitted.df$DAC), FUN=function(x){length(which(x=='yes in previous version'))})
+  colnames(previously.downloaded.df)[colnames(previously.downloaded.df) == 'Data downloaded'] <- 'PreviouslyDownloaded'
 
-  avg.approval.days <- stats::aggregate(approved.df["time_from_PI_submission_to_DAC_approval"], by=list(DAC=approved.df$DAC), FUN=mean)
-  med.approval.days <- stats::aggregate(approved.df["time_from_PI_submission_to_DAC_approval"], by=list(DAC=approved.df$DAC), FUN=stats::median)
+  # Table of DARs that are approved by DAC
+  approved.df <- submitted.df[submitted.df['time_from_PI_submission_to_DAC_approval'] != "", ]
+  total.approved.df <- stats::aggregate(approved.df["Approved by DAC"], by=list(DAC=approved.df$DAC), FUN=length)
+  avg.approval.days.df <- stats::aggregate(approved.df["time_from_PI_submission_to_DAC_approval"], by=list(DAC=approved.df$DAC), FUN=function(x){mean(x,na.rm = TRUE)})
+  med.approval.days.df <- stats::aggregate(approved.df["time_from_PI_submission_to_DAC_approval"], by=list(DAC=approved.df$DAC), FUN=function(x){stats::median(x,na.rm = TRUE)})
+  approved.summary.df <- data.frame(DAC=total.approved.df[,'DAC'],
+                                    TotalApproved=total.approved.df[,"Approved by DAC"],
+                                    AvgApprovalTime=avg.approval.days.df[,"time_from_PI_submission_to_DAC_approval"],
+                                    MedApprovalTime=med.approval.days.df[,"time_from_PI_submission_to_DAC_approval"]
+                                    )
 
-  summary.df <- avg.approval.days
-  summary.df['time_from_PI_submission_to_DAC_approval'] <- NULL
-  summary.df['AvgApprovalTime'] <- avg.approval.days['time_from_PI_submission_to_DAC_approval']
-  summary.df['MedApprovalTime'] <- med.approval.days['time_from_PI_submission_to_DAC_approval']
+    # Table of DARs that are rejected by DAC
+  rejected.df <- submitted.df[submitted.df['time_from_PI_submission_to_DAC_rejection'] != "", ]
+  total.rejected.df <- stats::aggregate(rejected.df["Rejected by DAC"], by=list(DAC=rejected.df$DAC), FUN=length)
+  avg.rejection.days.df <- stats::aggregate(rejected.df["time_from_PI_submission_to_DAC_rejection"], by=list(DAC=rejected.df$DAC), FUN=function(x){mean(x,na.rm = TRUE)})
+  med.rejection.days.df <- stats::aggregate(rejected.df["time_from_PI_submission_to_DAC_rejection"], by=list(DAC=rejected.df$DAC), FUN=function(x){stats::median(x,na.rm = TRUE)})
+  rejected.summary.df <- data.frame(DAC=total.rejected.df[,'DAC'],
+                                    TotalRejected=total.rejected.df[,"Rejected by DAC"],
+                                    AvgRejectionTime=avg.rejection.days.df[,"time_from_PI_submission_to_DAC_rejection"],
+                                    MedRejectionTime=med.rejection.days.df[,"time_from_PI_submission_to_DAC_rejection"]
+  )
 
-  daily.vector.list <- list()
-  for (i in 1:nrow(summary.df)) {
-    print(sprintf("Computing daily data for %s",summary.df[i,'DAC']))
-    daily.vector.list[[i]] <- get.dac.daily.approved.dar.vector(df,summary.df[i,'DAC'],start.date,end.date)
-  }
+  summary.df <- data.frame(DAC=unique(submitted.df['DAC']))
+  summary.df <- merge(summary.df,approved.summary.df,by.x='DAC',by.y='DAC',all.x=TRUE)
+  summary.df <- merge(summary.df,rejected.summary.df,by.x='DAC',by.y='DAC',all.x=TRUE)
+  summary.df <- merge(summary.df,total.submitted.count.df,by.x='DAC',by.y='DAC',all.x=TRUE)
+  summary.df <- merge(summary.df,total.downloaded.df,by.x='DAC',by.y='DAC',all.x=TRUE)
+  summary.df <- merge(summary.df,previously.downloaded.df,by.x='DAC',by.y='DAC',all.x=TRUE)
 
-  summary.df['DARDailyAvg'] <- unlist(lapply(daily.vector.list,mean))
-  summary.df['DARDailySD'] <- unlist(lapply(daily.vector.list,stats::sd))
-  summary.df['DARTotal'] <- unlist(lapply(daily.vector.list,sum))
+  # daily.vector.list <- list()
+  # for (i in 1:nrow(summary.df)) {
+  #   print(sprintf("Computing daily data for %s",summary.df[i,'DAC']))
+  #   daily.vector.list[[i]] <- get.dac.daily.approved.dar.vector(df,summary.df[i,'DAC'],start.date,end.date)
+  # }
+  #
+  # summary.df['DARDailyAvg'] <- unlist(lapply(daily.vector.list,mean))
+  # summary.df['DARDailySD'] <- unlist(lapply(daily.vector.list,stats::sd))
+  # summary.df['DARTotal'] <- unlist(lapply(daily.vector.list,sum))
 
   return(summary.df)
 }
@@ -167,3 +195,4 @@ get.study.summary.table <- function(start.date = '2000-01-01',end.date=format(Sy
 
   return(big.table)
 }
+
