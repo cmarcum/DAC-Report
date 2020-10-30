@@ -15,6 +15,7 @@ params:
   avg.final: "avg.final"
   avg.accept: "avg.accept"
   avg.reject: "avg.reject"
+  timeline.summary.table: "timeline.summary.table"
 --- 
 
 ---
@@ -23,17 +24,31 @@ author: `r params$author`
 date: `r format(Sys.time(), '%d %B, %Y')`
 ---
 
+```{r, include=FALSE}
+library(ggplot2)
+library(tidyverse)
+```
+
 The `r params$dac` Data Access Committee (DAC) currently manages `r params$total.number.of.dars` data access requests (DARs) for access to `r params$total.number.of.projects` projects in dbGaP.  
 
 # Data Access Requests
 Between `r params$start.date` and `r params$end.date` the DAC reviewed `r params$num.dars.in.window` DARs. Of these, `r params$number.of.accepted` were accepted while `r params$number.of.rejected` were rejected.  The average amount of time from when the Principle Investigator (PI) submited a DAR to the final decision by the DAC was `r params$avg.final` days.  The average time to an accepted decision was `r params$avg.accept` days, while the average time to a rejected decision was `r params$avg.reject` days.  Figure \@ref(fig:compline) is a barplot comparing the `r params$dac` DAC to time to final decision to the average across all NIH DACs during the same time interval.  
 
-```{r compline, fig.cap="Comparison of Time to Final Decision", echo=FALSE}
-par(mar = c(4, 4, .2, .1))
-plot(1:4) #call data and plot here
+```{r compline, fig.cap="Comparison of Time to Final Decision", echo=FALSE, warning=FALSE ,message=FALSE}
+timeline.summary.table <- timeline.summary.table %>% mutate(ToHighlight = ifelse( DAC == params$dac, "yes", "no" ))
+timeline.summary.table$AvgApprovalTime <- as.numeric(timeline.summary.table$AvgApprovalTime, units="days")
+timeline.summary.table<- timeline.summary.table[order(timeline.summary.table$AvgApprovalTime, decreasing=TRUE),]
+timeline.summary.table$DAC <- factor(timeline.summary.table$DAC, levels=unique(as.character(timeline.summary.table$DAC)))
+p <- ggplot(data=timeline.summary.table, aes(x=DAC, y=AvgApprovalTime, fill = ToHighlight)) +
+  geom_bar(stat="identity") +
+  # geom_text(aes(label=paste(round(AvgApprovalTime,1),'days'))) +
+  scale_y_continuous(breaks = seq(0, max(timeline.summary.table$AvgApprovalTime, na.rm = TRUE), by = 7)) +
+  scale_fill_manual(values = c("yes"="tomato","no"="gray"), guide = FALSE) +
+  coord_flip() +
+  ylab("Average Approval Time (days)")
+p
 ```
 
 # Study Registrations
-
 
 This report was prepared using the DACReportingTool package for R, build 0.0.1 by Mr. Hoyin Chu and Dr. Christopher Steven Marcum. 
