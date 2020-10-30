@@ -28,7 +28,7 @@ dar.review.timeline.summary(start.date, end.date, df = nih_dac_action_table)
 dataframe
 }
 \description{
-Returns a summary dataframe of all DAC which had DAR approved in the given timeframe
+Returns a summary dataframe of all DAC which had DAR submitted in the given timeframe
 }
 \examples{
 \dontrun{

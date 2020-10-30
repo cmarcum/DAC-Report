@@ -7,14 +7,6 @@ params:
   start.date: "start.date"
   end.date: "end.date"
   dac: "DAC"
-  total.number.of.dars: "total.number.of.dars"
-  total.number.of.projects: "total.number.of.projects"
-  num.dars.in.window: "num.dars.in.window"
-  number.of.accepted: "number.of.accepted"
-  number.of.rejected: "number.of.rejected"
-  avg.final: "avg.final"
-  avg.accept: "avg.accept"
-  avg.reject: "avg.reject"
   timeline.summary.table: "timeline.summary.table"
 --- 
 
@@ -25,14 +17,33 @@ date: `r format(Sys.time(), '%d %B, %Y')`
 ---
 
 ```{r, include=FALSE}
+# Loads variables to be reported
 library(ggplot2)
 library(tidyverse)
+dac <- params$dac
+
+dac.total.dars <- nrow(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,])
+total.number.of.projects <- length(unique(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,'Project']))
+
+dac.row <- timeline.summary.table[timeline.summary.table['DAC'] == dac,]
+
+num.dars.in.window <- dac.row[,'TotalRequests']
+number.of.accepted <- dac.row[,'TotalApproved']
+number.of.rejected <- dac.row[,'TotalRejected']
+
+avg.accept <- dac.row[,'AvgApprovalTime']
+avg.reject <- dac.row[,'AvgRejectionTime']
+
+dac.total.dars <- nrow(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,])
+dac.total.project <- length(unique(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,'Project']))
+
+avg.final <- (avg.accept*number.of.accepted + avg.reject*number.of.rejected) / (number.of.accepted+number.of.rejected)
 ```
 
-The `r params$dac` Data Access Committee (DAC) currently manages `r params$total.number.of.dars` data access requests (DARs) for access to `r params$total.number.of.projects` projects in dbGaP.  
+The `r dac` Data Access Committee (DAC) currently manages `r dac.total.dars` data access requests (DARs) for access to `r total.number.of.projects` projects in dbGaP.  
 
 # Data Access Requests
-Between `r params$start.date` and `r params$end.date` the DAC reviewed `r params$num.dars.in.window` DARs. Of these, `r params$number.of.accepted` were accepted while `r params$number.of.rejected` were rejected.  The average amount of time from when the Principle Investigator (PI) submited a DAR to the final decision by the DAC was `r params$avg.final` days.  The average time to an accepted decision was `r params$avg.accept` days, while the average time to a rejected decision was `r params$avg.reject` days.  Figure \@ref(fig:compline) is a barplot comparing the `r params$dac` DAC to time to final decision to the average across all NIH DACs during the same time interval.  
+Between `r params$start.date` and `r params$end.date` the DAC reviewed `r num.dars.in.window` DARs. Of these, `r number.of.accepted` were accepted while `r number.of.rejected` were rejected.  The average amount of time from when the Principle Investigator (PI) submited a DAR to the final decision by the DAC was `r avg.final` days.  The average time to an accepted decision was `r avg.accept` days, while the average time to a rejected decision was `r avg.reject` days.  Figure \@ref(fig:compline) is a barplot comparing the `r dac` DAC to time to final decision to the average across all NIH DACs during the same time interval.  
 
 ```{r compline, fig.cap="Comparison of Time to Final Decision", echo=FALSE, warning=FALSE ,message=FALSE}
 timeline.summary.table <- timeline.summary.table %>% mutate(ToHighlight = ifelse( DAC == params$dac, "yes", "no" ))
