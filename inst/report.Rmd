@@ -58,12 +58,15 @@ p <- ggplot(data=timeline.summary.table, aes(x=DAC, y=AvgApprovalTime, fill = To
   geom_bar(stat="identity") +
   # geom_text(aes(label=paste(round(AvgApprovalTime,1),'days'))) +
   scale_y_continuous(breaks = seq(0, max(timeline.summary.table$AvgApprovalTime, na.rm = TRUE), by = 7)) +
-  scale_fill_manual(values = c("yes"="tomato","no"="gray"), guide = FALSE) +
+  scale_fill_manual(values = c("yes"="cornflowerblue","no"="gray"), guide = FALSE) +
   coord_flip() +
   ylab("Average Approval Time (days)")
 p
 ```
 
+Among all approved DARs, PIs have downloaded `r number.with.downloads` datasets.  
+
 # Study Registrations
 
+---
 This report was prepared using the DACReportingTool package for R, build 0.0.1 by Mr. Hoyin Chu and Dr. Christopher Steven Marcum. 
