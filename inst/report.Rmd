@@ -22,8 +22,12 @@ library(ggplot2)
 library(tidyverse)
 dac <- params$dac
 
+print(dac)
+print(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,])
 dac.total.dars <- nrow(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,])
 total.number.of.projects <- length(unique(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,'Project']))
+
+print(dac.total.dars)
 
 dac.row <- timeline.summary.table[timeline.summary.table['DAC'] == dac,]
 
@@ -43,7 +47,7 @@ avg.final <- (avg.accept*number.of.accepted + avg.reject*number.of.rejected) / (
 The `r dac` Data Access Committee (DAC) currently manages `r dac.total.dars` data access requests (DARs) for access to `r total.number.of.projects` projects in dbGaP.  
 
 # Data Access Requests
-Between `r params$start.date` and `r params$end.date` the DAC reviewed `r num.dars.in.window` DARs. Of these, `r number.of.accepted` were accepted while `r number.of.rejected` were rejected.  The average amount of time from when the Principle Investigator (PI) submited a DAR to the final decision by the DAC was `r avg.final` days.  The average time to an accepted decision was `r avg.accept` days, while the average time to a rejected decision was `r avg.reject` days.  Figure \@ref(fig:compline) is a barplot comparing the `r dac` DAC to time to final decision to the average across all NIH DACs during the same time interval.  
+Between `r params$start.date` and `r params$end.date` the DAC reviewed `r num.dars.in.window` DARs. Of these, `r number.of.accepted` were accepted while `r number.of.rejected` were rejected.  The average amount of time from when the Principle Investigator (PI) submited a DAR to the final decision by the DAC was `r round(avg.final,1)` days.  The average time to an accepted decision was `r round(avg.accept,1)` days, while the average time to a rejected decision was `r round(avg.reject,1)` days.  Figure \@ref(fig:compline) is a barplot comparing the `r dac` DAC to time to final decision to the average across all NIH DACs during the same time interval.  
 
 ```{r compline, fig.cap="Comparison of Time to Final Decision", echo=FALSE, warning=FALSE ,message=FALSE}
 timeline.summary.table <- timeline.summary.table %>% mutate(ToHighlight = ifelse( DAC == params$dac, "yes", "no" ))

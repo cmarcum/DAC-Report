@@ -101,9 +101,11 @@ update.dac.action.table <- function(update.to=format(Sys.Date(),"%m/%d/%Y"),over
   # Get table starting from latest date, append to current table
   new.table <- get.all.dac.action.table(format(cur.table.latest,"%m/%d/%Y"),format(update.to,"%m/%d/%Y"))
   combined.table <- dplyr::bind_rows(nih_dac_action_table,new.table)
+  combined.table
   # Drop rows with same DAR id (only keep the latest one)
   combined.table <- combined.table[!duplicated(combined.table$DAR, fromLast=T),]
   nih_dac_action_table <- combined.table
+
   if (overwrite) {
     save(nih_dac_action_table,file = "./data/nih_dac_action_table.rda")
   }
@@ -135,7 +137,9 @@ get.data.use.summary.table <- function(request.url,table.xpath) {
   # Use first row as column headers
   names(big.df) <- big.df[1,]
   big.df <- big.df[-1,]
-  return(big.df)
+  # remove beginning and trailing white spaces
+  clean.df <- as.data.frame(apply(big.df,2, trimws, which="both"))
+  return(clean.df)
 }
 
 
