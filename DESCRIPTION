@@ -2,10 +2,10 @@ Package: DACReportingTool
 Type: Package
 Title: An R interface for dbGAP Data Access Committee activity data and analysis
 Version: 0.1.0
-Author: Hoyin Chu, Chris Marcum
+Author: Hoyin Chu, Christopher Steven Marcum <chris.marcum@nih.gov>
 Maintainer: Hoyin Chu <hoyin.chu@nih.gov>
-Description: Provides functions to retrieve, analyze and visuialize tables from https: //www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi which contains meta-information about data access requests made to NCBI's dbGaP (https: //www.ncbi.nlm.nih.gov/gap/)
-License: GNU
+Description: Provides functions to retrieve, analyze and visualize tables from NCBI's dbGaP Data Access Committee reporting tables.
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
