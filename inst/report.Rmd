@@ -70,4 +70,4 @@ Among all approved DARs, PIs have downloaded `r number.with.downloads` datasets.
 
 
 ---
-This report was prepared using the DACReportingTool package for R, build 0.0.1 by Mr. Hoyin Chu and Dr. Christopher Steven Marcum. 
+This report was prepared using the DACReportingTool package for R, build `r packageVersion("DACReportingTool")` by Mr. Hoyin Chu and Dr. Christopher Steven Marcum. 
