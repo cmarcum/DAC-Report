@@ -92,7 +92,6 @@ update.dac.action.table <- function(update.to=format(Sys.Date(),"%m/%d/%Y"),over
   update.to <- as.Date(update.to,"%m/%d/%Y")
   # Loads the latest nih dac action table into the session
   load(system.file("data", "nih_dac_action_table.rda", package = "DACReportingTool"))
-  print(nih_dac_action_table)
   #load('./data/nih_dac_action_table.rda')
   converted.date <- as.POSIXct(nih_dac_action_table[,'Approved by DAC'], format="%m/%d/%Y %H:%M", tz="EST")
   # Use the latest date in the approved by dac column as the last updated date
