@@ -64,9 +64,10 @@ p <- ggplot(data=timeline.summary.table, aes(x=DAC, y=AvgApprovalTime, fill = To
 p
 ```
 
-Among all approved DARs, PIs have downloaded `r number.with.downloads` datasets.  
+Among all approved DARs, PIs have downloaded `r number.with.downloads` datasets.  During this reporting period, study number `r phs.popular` (`r study.name.popular`) was the most commonly requested dataset with `r number.requests.popular` while `r phs.most.popular` (`r study.name.most.popular`) has been the most requested dataset from the `r dac` DAC with `r number.requests.most.poplar` requests. 
 
 # Study Registrations
+
 
 ---
 This report was prepared using the DACReportingTool package for R, build 0.0.1 by Mr. Hoyin Chu and Dr. Christopher Steven Marcum. 
