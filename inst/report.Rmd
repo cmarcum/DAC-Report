@@ -8,6 +8,8 @@ params:
   end.date: "end.date"
   dac: "DAC"
   timeline.summary.table: "timeline.summary.table"
+  study.summary.table: "study.summary.table"
+  study.status.table: "study.status.table"
 --- 
 
 ---
@@ -22,12 +24,8 @@ library(ggplot2)
 library(tidyverse)
 dac <- params$dac
 
-print(dac)
-print(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,])
 dac.total.dars <- nrow(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,])
 total.number.of.projects <- length(unique(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,'Project']))
-
-print(dac.total.dars)
 
 dac.row <- timeline.summary.table[timeline.summary.table['DAC'] == dac,]
 
@@ -64,7 +62,42 @@ p <- ggplot(data=timeline.summary.table, aes(x=DAC, y=AvgApprovalTime, fill = To
 p
 ```
 
-Among all approved DARs, PIs have downloaded `r number.with.downloads` datasets.  During this reporting period, study number `r phs.popular` (`r study.name.popular`) was the most commonly requested dataset with `r number.requests.popular` while `r phs.most.popular` (`r study.name.most.popular`) has been the most requested dataset from the `r dac` DAC with `r number.requests.most.poplar` requests. 
+```{r include=FALSE}
+study.summary.table.ordered <- study.summary.table[order(-study.summary.table$TotalRequest),]
+total.approved.dar <- sum(study.summary.table.ordered$TotalApproved)
+total.dar.downloaded <- sum(study.summary.table.ordered$TotalDownload)
+download.percentage <- round(total.dar.downloaded*100/total.approved.dar,2)
+phs.popular.all <- study.summary.table.ordered[1,]['StudyAccesion']
+phs.popular.all.study.name <- study.summary.table.ordered[1,]['Study Name']
+phs.popular.all.dac <- study.summary.table.ordered[1,]['DAC']
+phs.popular.all.total.request <- study.summary.table.ordered[1,]['TotalRequest']
+
+dac.study.summary.table <- study.summary.table[study.summary.table['DAC'] == dac,]
+dac.study.summary.table.ordered <- dac.study.summary.table[order(-dac.study.summary.table$TotalRequest),]
+phs.popular.this.dac <- dac.study.summary.table.ordered[1,]['StudyAccesion']
+phs.popular.this.dac.study.name <- dac.study.summary.table.ordered[1,]['Study Name']
+phs.popular.this.dac.total.request <- dac.study.summary.table.ordered[1,]['TotalRequest']
+```
+
+
+Among all approved DARs, PIs have downloaded `r total.dar.downloaded` (`r download.percentage`%) datasets.  During this reporting period, study number `r phs.popular.all` (`r phs.popular.all.study.name`) from `r phs.popular.all.dac` was the most commonly requested dataset with `r phs.popular.all.total.request` total requests while `r phs.popular.this.dac` (`r phs.popular.this.dac.study.name`) has been the most requested dataset from the `r dac` DAC with `r phs.popular.this.dac.total.request` requests. 
+
+
+```{r fig.cap="Comparison of Cummulative DAR and Studies Released", echo=FALSE, warning=FALSE ,message=FALSE}
+p <- ggplot(study.status.table, aes(x=Month)) +
+  geom_line(aes(y=TotalRequestsCummulative, colour="Total Requests")) +
+  geom_line(aes(y=StudiesReleasedCummulative, colour="Studies Released")) +
+  scale_color_manual("",
+                     values = c("Total Requests"="green", "Studies Released"="red"))
+rect <- data.frame(xmin=as.Date(lubridate::floor_date(as.Date(params$start.date))), xmax=as.Date(lubridate::floor_date(as.Date(params$end.date))), ymin=-Inf, ymax=Inf)
+p <- p + geom_rect(data=rect, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax),
+              color="grey80",
+              alpha=0.2,
+              inherit.aes = FALSE)
+p
+```
+
+
 
 # Study Registrations
 

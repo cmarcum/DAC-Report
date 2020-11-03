@@ -30,6 +30,10 @@ compile.dac.report <- function(dac, author, start.date, end.date,...) {
   title <- paste(toupper(dac), "Data Access Committee dbGaP Activity Report \n", paste(start.date,end.date,sep="-"), sep=" ")
 
   timeline.summary.table <- dar.review.timeline.summary(start.date,end.date)
+  # study.summary.table <- get.study.summary.table(start.date,end.date)
+  study.summary.table <- test.study.summary.table
+  study.status.table <- get.monthly.study.status('2000-01-01',Sys.Date())
+  study.status.table <- filter(study.status.table, study.status.table$Month >= as.Date('2015-01-01'))
 
   rmarkdown::render(this.file, params = list(
   title = title,
@@ -37,6 +41,8 @@ compile.dac.report <- function(dac, author, start.date, end.date,...) {
   end.date = end.date,
   author = author,
   dac=dac,
-  timeline.summary.table=timeline.summary.table
+  timeline.summary.table=timeline.summary.table,
+  study.summary.table=study.summary.table,
+  study.status.table=study.status.table
    ),...)
 }
