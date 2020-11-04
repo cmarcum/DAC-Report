@@ -9,7 +9,8 @@ params:
   dac: "DAC"
   timeline.summary.table: "timeline.summary.table"
   study.summary.table: "study.summary.table"
-  study.status.table: "study.status.table"
+  study.status.table.all: "study.status.table.all"
+  study.status.table.dac: "study.status.table.dac"
 --- 
 
 ---
@@ -85,7 +86,7 @@ Among all approved DARs, PIs have downloaded `r total.dar.downloaded` (`r downlo
 
 ```{r fig.cap="Comparison of Cummulative DAR Made and Studies Released Per Month Across All DACs", echo=FALSE, warning=FALSE ,message=FALSE}
 
-p <- ggplot(study.status.table, aes(x=Month)) +
+p <- ggplot(study.status.table.all, aes(x=Month)) +
   geom_line(aes(y=TotalRequestsCummulative, colour="Total Requests"), size=2) +
   geom_line(aes(y=StudiesReleasedCummulative, colour="Studies Released"), size=2) +
   scale_color_manual("",
@@ -104,6 +105,25 @@ p <- p + geom_rect(data=rect, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax),
 p
 ```
 
+```{r fig.cap="Comparison of Cummulative DAR Made and Studies Released Per Month in current DAC", echo=FALSE, warning=FALSE ,message=FALSE}
+p <- ggplot(study.status.table.dac, aes(x=Month)) +
+  geom_line(aes(y=TotalRequestsCummulative, colour="Total Requests"), size=2) +
+  geom_line(aes(y=StudiesReleasedCummulative, colour="Studies Released"), size=2) +
+  scale_color_manual("",
+                     values = c("Total Requests"="cornflowerblue", "Studies Released"="coral3")) +
+  theme(legend.position = "bottom") +
+  scale_y_continuous(n.breaks = 8) +
+  xlab("Year") +
+  ylab("DAR Total / Studies Released")
+  
+rect <- data.frame(xmin=as.Date(lubridate::floor_date(as.Date(params$start.date))), xmax=as.Date(lubridate::floor_date(as.Date(params$end.date))), ymin=0, ymax=Inf)
+
+p <- p + geom_rect(data=rect, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax),
+              color="gray20",
+              alpha=0.2,
+              inherit.aes = FALSE)
+p
+```
 
 
 # Study Registrations

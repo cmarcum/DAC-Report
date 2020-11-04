@@ -196,26 +196,25 @@ get.study.summary.table <- function(start.date = '2000-01-01',end.date=format(Sy
   return(big.table)
 }
 
-get.monthly.study.status <- function(start.date,end.date) {
-  temp_studies_table <- all_nih_dac_studies_table
+get.monthly.study.status <- function(start.date,end.date,studie.df=all_nih_dac_studies_table,action.table.df=nih_dac_action_table) {
+  # Aggregate of studies released by month
+  temp_studies_table <- studie.df
   temp_studies_table$ReleaseMonth <- lubridate::floor_date(as.Date(temp_studies_table[,'Study Release Date'], format = "%m/%d/%Y"),"month")
   monthly.study.released.df <- stats::aggregate(temp_studies_table['Study Name'], by=list(Month=temp_studies_table$ReleaseMonth), FUN=length)
-  temp_nih_dac_action_table <- nih_dac_action_table
+
+  # Aggreagate of requests made by month
+  temp_nih_dac_action_table <- action.table.df
   temp_nih_dac_action_table$ApprovalMonth <- lubridate::floor_date(to.time(temp_nih_dac_action_table[,'Approved by DAC']),"month")
   monthly.dac.approval.df <- stats::aggregate(temp_nih_dac_action_table['DAR'], by=list(Month=temp_nih_dac_action_table$ApprovalMonth), FUN=length)
   monthly.dac.approval.df$Month <- as.Date(monthly.dac.approval.df$Month)
-  # all.dacs <- unique(temp_studies_table$DAC)
-  # # Produces a vector where each element is a dataframe containing the DAC's studies by month
-  # study.by.month.df.vec <- sapply(all.dacs, function(x) {
-  #   cur.dac.df <- temp_studies_table[temp_studies_table['DAC'] == x,]
-  #   print(cur.dac.df)
-  #   stats::aggregate(cur.dac.df['Study Name'], by=list(Month=cur.dac.df$Month), FUN=length)
-  #   })
+
+  # Join the two tables
   temp.df <- data.frame(Month=seq(as.Date(start.date),as.Date(end.date), by='month'))
   big.df <- merge(temp.df, monthly.study.released.df,by='Month', all.x=TRUE)
   big.df <- merge(big.df, monthly.dac.approval.df, by.x='Month', by.y='Month', all.x=TRUE)
   big.df[is.na(big.df)] <- 0
 
+  # Rename columns appropriately
   names(big.df)[names(big.df) == 'Study Name'] <- 'StudiesReleased'
   names(big.df)[names(big.df) == 'DAR'] <- 'TotalRequests'
 

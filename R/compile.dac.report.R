@@ -24,17 +24,25 @@
 #'
 #' @export
 compile.dac.report <- function(dac, author, start.date, end.date,...) {
-
+  # Markdown template to use
   this.file<- system.file("inst", "report.Rmd", package = "DACReportingTool")
 
   title <- paste(toupper(dac), "Data Access Committee dbGaP Activity Report \n", paste(start.date,end.date,sep="-"), sep=" ")
 
+  dac.specific.studies.table <- all_nih_dac_studies_table[all_nih_dac_studies_table["DAC"] == dac,]
+  dac.specific.action.table <- nih_dac_action_table[nih_dac_action_table["DAC"] == dac,]
+
   timeline.summary.table <- dar.review.timeline.summary(start.date,end.date)
   # study.summary.table <- get.study.summary.table(start.date,end.date)
   study.summary.table <- test.study.summary.table
-  study.status.table <- get.monthly.study.status('2000-01-01',Sys.Date())
-  study.status.table <- filter(study.status.table, study.status.table$Month >= as.Date('2015-01-01'))
 
+    study.status.table.all <- get.monthly.study.status('2000-01-01',Sys.Date())
+  study.status.table.all <- filter(study.status.table.all, study.status.table.all$Month >= as.Date('2015-01-01'))
+
+  study.status.table.dac <- get.monthly.study.status('2000-01-01',Sys.Date(), dac.specific.studies.table,dac.specific.action.table)
+
+  study.status.table.dac <- filter(study.status.table.dac, study.status.table.dac$Month >= as.Date('2015-01-01'))
+  print(study.status.table.dac)
   rmarkdown::render(this.file, params = list(
   title = title,
   start.date = start.date,
@@ -43,6 +51,7 @@ compile.dac.report <- function(dac, author, start.date, end.date,...) {
   dac=dac,
   timeline.summary.table=timeline.summary.table,
   study.summary.table=study.summary.table,
-  study.status.table=study.status.table
+  study.status.table.all=study.status.table.all,
+  study.status.table.dac=study.status.table.dac
    ),...)
 }
