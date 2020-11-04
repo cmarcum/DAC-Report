@@ -83,15 +83,22 @@ phs.popular.this.dac.total.request <- dac.study.summary.table.ordered[1,]['Total
 Among all approved DARs, PIs have downloaded `r total.dar.downloaded` (`r download.percentage`%) datasets.  During this reporting period, study number `r phs.popular.all` (`r phs.popular.all.study.name`) from `r phs.popular.all.dac` was the most commonly requested dataset with `r phs.popular.all.total.request` total requests while `r phs.popular.this.dac` (`r phs.popular.this.dac.study.name`) has been the most requested dataset from the `r dac` DAC with `r phs.popular.this.dac.total.request` requests. 
 
 
-```{r fig.cap="Comparison of Cummulative DAR and Studies Released", echo=FALSE, warning=FALSE ,message=FALSE}
+```{r fig.cap="Comparison of Cummulative DAR Made and Studies Released Per Month Across All DACs", echo=FALSE, warning=FALSE ,message=FALSE}
+
 p <- ggplot(study.status.table, aes(x=Month)) +
-  geom_line(aes(y=TotalRequestsCummulative, colour="Total Requests")) +
-  geom_line(aes(y=StudiesReleasedCummulative, colour="Studies Released")) +
+  geom_line(aes(y=TotalRequestsCummulative, colour="Total Requests"), size=2) +
+  geom_line(aes(y=StudiesReleasedCummulative, colour="Studies Released"), size=2) +
   scale_color_manual("",
-                     values = c("Total Requests"="green", "Studies Released"="red"))
-rect <- data.frame(xmin=as.Date(lubridate::floor_date(as.Date(params$start.date))), xmax=as.Date(lubridate::floor_date(as.Date(params$end.date))), ymin=-Inf, ymax=Inf)
+                     values = c("Total Requests"="cornflowerblue", "Studies Released"="coral3")) +
+  theme(legend.position = "bottom") +
+  scale_y_continuous(trans='log2', n.breaks = 8) +
+  xlab("Year") +
+  ylab("DAR Total / Studies Released (log scale)")
+  
+rect <- data.frame(xmin=as.Date(lubridate::floor_date(as.Date(params$start.date))), xmax=as.Date(lubridate::floor_date(as.Date(params$end.date))), ymin=0, ymax=Inf)
+
 p <- p + geom_rect(data=rect, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax),
-              color="grey80",
+              color="gray20",
               alpha=0.2,
               inherit.aes = FALSE)
 p
