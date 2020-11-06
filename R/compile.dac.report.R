@@ -36,13 +36,16 @@ compile.dac.report <- function(dac, author, start.date, end.date,...) {
   # study.summary.table <- get.study.summary.table(start.date,end.date)
   study.summary.table <- test.study.summary.table
 
-    study.status.table.all <- get.monthly.study.status('2000-01-01',Sys.Date())
+  study.status.table.all <- get.monthly.study.status('2000-01-01',Sys.Date())
   study.status.table.all <- filter(study.status.table.all, study.status.table.all$Month >= as.Date('2015-01-01'))
 
   study.status.table.dac <- get.monthly.study.status('2000-01-01',Sys.Date(), dac.specific.studies.table,dac.specific.action.table)
 
+  pi.requests.table.overall <- get.pi.table('2000-01-01',Sys.Date())
+  pi.requests.table.selected.time <- get.pi.table(start.date,end.date)
+
   study.status.table.dac <- filter(study.status.table.dac, study.status.table.dac$Month >= as.Date('2015-01-01'))
-  print(study.status.table.dac)
+
   rmarkdown::render(this.file, params = list(
   title = title,
   start.date = start.date,
@@ -52,6 +55,8 @@ compile.dac.report <- function(dac, author, start.date, end.date,...) {
   timeline.summary.table=timeline.summary.table,
   study.summary.table=study.summary.table,
   study.status.table.all=study.status.table.all,
-  study.status.table.dac=study.status.table.dac
+  study.status.table.dac=study.status.table.dac,
+  pi.requests.table.overall=pi.requests.table.overall,
+  pi.requests.table.selected.time=pi.requests.table.selected.time
    ),...)
 }

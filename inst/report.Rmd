@@ -11,6 +11,8 @@ params:
   study.summary.table: "study.summary.table"
   study.status.table.all: "study.status.table.all"
   study.status.table.dac: "study.status.table.dac"
+  pi.requests.table.overall: "pi.requests.table.overall"
+  pi.requests.table.selected.time: "pi.requests.table.selected.time"
 --- 
 
 ---
@@ -127,6 +129,22 @@ p
 
 
 # Study Registrations
+
+```{r echo=FALSE, warning=FALSE ,message=FALSE}
+
+pi.submitted.to.current.dac.overall <- unique(nih_dac_action_table[nih_dac_action_table["DAC"] == dac,]$PI)
+nih_dac_action_table_current <- get.df.within.range(nih_dac_action_table,start.date,end.date,date.col="Submitted by PI")
+pi.submitted.to.current.dac.selected.time <- unique(nih_dac_action_table_current[nih_dac_action_table_current["DAC"] == dac,]$PI)
+  
+current.dac.pi.table <- subset(pi.requests.table.selected.time, PI %in% pi.submitted.to.current.dac.selected.time)
+current.dac.pi.submit.to.more.than.one.dac <-  sum(current.dac.pi.table$DAC > 1)
+current.dac.pi.average.dar <- round(mean(current.dac.pi.table$DAR),2)
+current.dac.pi.average.dac <- round(mean(current.dac.pi.table$DAC),2)
+current.dac.pi.average.project <- round(mean(current.dac.pi.table$Project),2)
+```
+
+Between `r start.date` and `r end.date`, `r length(pi.submitted.to.current.dac.selected.time)` PIs have submitted DAR to studies hosted by `r dac`. Among these PIs, `r current.dac.pi.submit.to.more.than.one.dac` have also submitted DAR to studies hosted by other DACs. PI who submitted DAR to `r dac` 
+on average submits `r current.dac.pi.average.dar` DAR to `r current.dac.pi.average.dac` DACs for `r current.dac.pi.average.project` projects.
 
 
 ---

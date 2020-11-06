@@ -167,6 +167,7 @@ get.study.summary.table <- function(start.date = '2000-01-01',end.date=format(Sy
   submitted.df <- get.df.within.range(df,start.date,end.date,date.col="Submitted by PI")
   all.studies <- unique(submitted.df[,'Study accesion'])
   print('Calculating stats for every study...')
+
   total.request <- unlist(lapply(all.studies, function(x) {nrow(submitted.df[submitted.df['Study accesion'] == x,])}))
   total.approved <- unlist(lapply(all.studies, function(x) {sum(submitted.df[submitted.df['Study accesion'] == x,]['Approved by DAC'] != '')}))
   total.rejected <- unlist(lapply(all.studies, function(x) {sum(submitted.df[submitted.df['Study accesion'] == x,]['Rejected by DAC'] != '')}))
@@ -196,9 +197,11 @@ get.study.summary.table <- function(start.date = '2000-01-01',end.date=format(Sy
   return(big.table)
 }
 
-get.monthly.study.status <- function(start.date,end.date,studie.df=all_nih_dac_studies_table,action.table.df=nih_dac_action_table) {
+
+# Returns a table with monthly comparison of Total DAR and Studies Released
+get.monthly.study.status <- function(start.date,end.date,studies.df=all_nih_dac_studies_table,action.table.df=nih_dac_action_table) {
   # Aggregate of studies released by month
-  temp_studies_table <- studie.df
+  temp_studies_table <- studies.df
   temp_studies_table$ReleaseMonth <- lubridate::floor_date(as.Date(temp_studies_table[,'Study Release Date'], format = "%m/%d/%Y"),"month")
   monthly.study.released.df <- stats::aggregate(temp_studies_table['Study Name'], by=list(Month=temp_studies_table$ReleaseMonth), FUN=length)
 
@@ -222,4 +225,15 @@ get.monthly.study.status <- function(start.date,end.date,studie.df=all_nih_dac_s
   big.df$TotalRequestsCummulative <- cumsum(big.df[,"TotalRequests"])
 
   return(big.df)
+}
+
+# Returns a table about PI and their DAR status
+get.pi.table <- function(start.date,end.date,action.table.df=nih_dac_action_table) {
+  action.table.df <- get.df.within.range(action.table.df,start.date,end.date,date.col="Submitted by PI")
+  pi.dar.submitted.table <- stats::aggregate(action.table.df[c("DAR","DAC","Project")], by=list(PI=action.table.df$PI), FUN=function(x){length(unique(x))})
+  pi.approval.table <- stats::aggregate(action.table.df[c('Approved by DAC', 'Rejected by DAC')], by=list(PI=action.table.df$PI), FUN=function(x){sum(x != "")})
+  pi.data.downloaded.table <- stats::aggregate(action.table.df['Data downloaded'], by=list(PI=action.table.df$PI), FUN=function(x){sum(x == 'yes') + sum(x == 'yes in previous version')})
+  pi.big.table <- merge(pi.dar.submitted.table,pi.approval.table,by="PI")
+  pi.big.table <- merge(pi.big.table,pi.data.downloaded.table,by="PI")
+  return(pi.big.table)
 }
