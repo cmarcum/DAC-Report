@@ -48,7 +48,7 @@ avg.final <- (avg.accept*number.of.accepted + avg.reject*number.of.rejected) / (
 The `r dac` Data Access Committee (DAC) currently manages `r dac.total.dars` data access requests (DARs) for access to `r total.number.of.projects` projects in dbGaP.  
 
 # Data Access Requests
-Between `r params$start.date` and `r params$end.date` the DAC reviewed `r num.dars.in.window` DARs. Of these, `r number.of.accepted` were accepted while `r number.of.rejected` were rejected.  The average amount of time from when the Principle Investigator (PI) submited a DAR to the final decision by the DAC was `r round(avg.final,1)` days.  The average time to an accepted decision was `r round(avg.accept,1)` days, while the average time to a rejected decision was `r round(avg.reject,1)` days.  Figure \@ref(fig:compline) is a barplot comparing the `r dac` DAC to time to final decision to the average across all NIH DACs during the same time interval.  
+Between `r params$start.date` and `r params$end.date` `r dac` reviewed `r num.dars.in.window` DARs. Of these, `r number.of.accepted` were accepted while `r number.of.rejected` were rejected.  The average amount of time from when the Principle Investigator (PI) submited a DAR to the final decision by the DAC was `r round(avg.final,1)` days.  The average time to an accepted decision was `r round(avg.accept,1)` days, while the average time to a rejected decision was `r round(avg.reject,1)` days.  Figure \@ref(fig:compline) is a barplot comparing the `r dac` DAC to time to final decision to the average across all NIH DACs during the same time interval.  
 
 ```{r compline, fig.cap="Comparison of Time to Final Decision", echo=FALSE, warning=FALSE ,message=FALSE}
 timeline.summary.table <- timeline.summary.table %>% mutate(ToHighlight = ifelse( DAC == params$dac, "yes", "no" ))
@@ -66,14 +66,14 @@ p
 ```
 
 ```{r include=FALSE}
-study.summary.table.ordered <- study.summary.table[order(-study.summary.table$TotalRequest),]
-total.approved.dar <- sum(study.summary.table.ordered$TotalApproved)
-total.dar.downloaded <- sum(study.summary.table.ordered$TotalDownload)
-download.percentage <- round(total.dar.downloaded*100/total.approved.dar,2)
-phs.popular.all <- study.summary.table.ordered[1,]['StudyAccesion']
-phs.popular.all.study.name <- study.summary.table.ordered[1,]['Study Name']
-phs.popular.all.dac <- study.summary.table.ordered[1,]['DAC']
-phs.popular.all.total.request <- study.summary.table.ordered[1,]['TotalRequest']
+# study.summary.table.ordered <- study.summary.table[order(-study.summary.table$TotalRequest),]
+# total.approved.dar <- sum(study.summary.table.ordered$TotalApproved)
+# total.dar.downloaded <- sum(study.summary.table.ordered$TotalDownload)
+# download.percentage <- round(total.dar.downloaded*100/total.approved.dar,2)
+# phs.popular.all <- study.summary.table.ordered[1,]['StudyAccesion']
+# phs.popular.all.study.name <- study.summary.table.ordered[1,]['Study Name']
+# phs.popular.all.dac <- study.summary.table.ordered[1,]['DAC']
+# phs.popular.all.total.request <- study.summary.table.ordered[1,]['TotalRequest']
 
 dac.study.summary.table <- study.summary.table[study.summary.table['DAC'] == dac,]
 dac.study.summary.table.ordered <- dac.study.summary.table[order(-dac.study.summary.table$TotalRequest),]
@@ -83,31 +83,53 @@ phs.popular.this.dac.total.request <- dac.study.summary.table.ordered[1,]['Total
 ```
 
 
-Among all approved DARs, PIs have downloaded `r total.dar.downloaded` (`r download.percentage`%) datasets.  During this reporting period, study number `r phs.popular.all` (`r phs.popular.all.study.name`) from `r phs.popular.all.dac` was the most commonly requested dataset with `r phs.popular.all.total.request` total requests while `r phs.popular.this.dac` (`r phs.popular.this.dac.study.name`) has been the most requested dataset from the `r dac` DAC with `r phs.popular.this.dac.total.request` requests. 
+During this reporting period, study `r phs.popular.this.dac` (`r phs.popular.this.dac.study.name`) has been the most requested dataset from the `r dac` DAC with `r phs.popular.this.dac.total.request` requests. 
 
+```{r include=FALSE}
+fig2.caption <- sprintf("Comparison of Cummulative DAR Made to and Studies Released by %s",dac)
+```
 
-```{r fig.cap="Comparison of Cummulative DAR Made and Studies Released Per Month Across All DACs", echo=FALSE, warning=FALSE ,message=FALSE}
+```{r fig.cap=fig2.caption, echo=FALSE, warning=FALSE ,message=FALSE, figures-side, fig.show="hold", out.width="50%"}
+# p <- ggplot(study.status.table.all, aes(x=Month)) +
+#   geom_line(aes(y=TotalRequestsCummulative, colour="Total Requests"), size=2) +
+#   geom_line(aes(y=StudiesReleasedCummulative, colour="Studies Released"), size=2) +
+#   scale_color_manual("",
+#                      values = c("Total Requests"="cornflowerblue", "Studies Released"="coral3")) +
+#   theme(legend.position = "bottom") +
+#   scale_y_continuous(trans='log2', n.breaks = 8) +
+#   xlab("Year") +
+#   ylab("DAR Total / Studies Released (log scale)")
+#   
+# rect <- data.frame(xmin=as.Date(lubridate::floor_date(as.Date(params$start.date))), xmax=as.Date(lubridate::floor_date(as.Date(params$end.date))), ymin=0, ymax=Inf)
+# 
+# p <- p + geom_rect(data=rect, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax),
+#               color="gray20",
+#               alpha=0.2,
+#               inherit.aes = FALSE)
+# p
 
-p <- ggplot(study.status.table.all, aes(x=Month)) +
+p2 <- ggplot(study.status.table.dac, aes(x=Month)) +
   geom_line(aes(y=TotalRequestsCummulative, colour="Total Requests"), size=2) +
   geom_line(aes(y=StudiesReleasedCummulative, colour="Studies Released"), size=2) +
   scale_color_manual("",
-                     values = c("Total Requests"="cornflowerblue", "Studies Released"="coral3")) +
+                     values = c("Total Requests"="cornflowerblue","Studies Released"="coral3")) +
   theme(legend.position = "bottom") +
-  scale_y_continuous(trans='log2', n.breaks = 8) +
+  scale_x_date(date_breaks = "6 month", date_labels = '%m/%Y') +
+  scale_y_continuous(n.breaks = 8) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
   xlab("Year") +
-  ylab("DAR Total / Studies Released (log scale)")
+  ylab("DAR Total / Studies Released")
   
-rect <- data.frame(xmin=as.Date(lubridate::floor_date(as.Date(params$start.date))), xmax=as.Date(lubridate::floor_date(as.Date(params$end.date))), ymin=0, ymax=Inf)
+rect2 <- data.frame(xmin=as.Date(lubridate::floor_date(as.Date(params$start.date))), xmax=as.Date(lubridate::floor_date(as.Date(params$end.date))), ymin=0, ymax=Inf)
 
-p <- p + geom_rect(data=rect, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax),
+p2 <- p2 + geom_rect(data=rect2, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax),
               color="gray20",
               alpha=0.2,
               inherit.aes = FALSE)
-p
+p2
 ```
 
-```{r fig.cap="Comparison of Cummulative DAR Made and Studies Released Per Month in current DAC", echo=FALSE, warning=FALSE ,message=FALSE}
+```{r fig.cap="Comparison of Cummulative DAR Made and Studies Released Per Month in current DAC", echo=FALSE, warning=FALSE ,message=FALSE, include=FALSE, fig.align="center"}
 p <- ggplot(study.status.table.dac, aes(x=Month)) +
   geom_line(aes(y=TotalRequestsCummulative, colour="Total Requests"), size=2) +
   geom_line(aes(y=StudiesReleasedCummulative, colour="Studies Released"), size=2) +
