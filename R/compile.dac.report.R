@@ -33,8 +33,7 @@ compile.dac.report <- function(dac, author, start.date, end.date,...) {
   dac.specific.action.table <- nih_dac_action_table[nih_dac_action_table["DAC"] == dac,]
 
   timeline.summary.table <- dar.review.timeline.summary(start.date,end.date)
-  # study.summary.table <- get.study.summary.table(start.date,end.date)
-  study.summary.table <- test.study.summary.table
+  study.summary.table <- get.study.summary.table(start.date,end.date)
 
   study.status.table.all <- get.monthly.study.status('2000-01-01',Sys.Date())
   study.status.table.all <- filter(study.status.table.all, study.status.table.all$Month >= as.Date('2015-01-01'))

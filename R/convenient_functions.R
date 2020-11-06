@@ -164,37 +164,21 @@ to.time <- function(col) {
 #'
 #' @export
 get.study.summary.table <- function(start.date = '2000-01-01',end.date=format(Sys.Date()), df=nih_dac_action_table) {
+  print('Computing Study Summary Table...')
+
   submitted.df <- get.df.within.range(df,start.date,end.date,date.col="Submitted by PI")
+  submitted.df$`TimeToApproval` <- difftime(to.time(submitted.df[,'Approved by DAC']),to.time(submitted.df[,'Submitted by PI']), units="days")
+
   all.studies <- unique(submitted.df[,'Study accesion'])
-  print('Calculating stats for every study...')
+  studies.status.table <- stats::aggregate(submitted.df[c('Submitted by PI','Approved by DAC','Rejected by DAC')], by=list(StudyAccession=submitted.df$`Study accesion`), FUN=function(x){sum(x!='')})
+  studies.download.table <- stats::aggregate(submitted.df['Data downloaded'], by=list(StudyAccession=submitted.df$`Study accesion`), FUN=function(x){sum(x == 'yes') + sum(x == 'yes in previous version')})
+  studies.avg.approval.time.table <-  stats::aggregate(submitted.df['TimeToApproval'], by=list(StudyAccession=submitted.df$`Study accesion`), FUN=function(x){mean(x,na.rm = TRUE)})
+  studies.big.table <- merge(studies.status.table,studies.download.table,by="StudyAccession")
+  studies.big.table <- merge(studies.big.table,studies.avg.approval.time.table, by="StudyAccession")
+  colnames(studies.big.table) <- c("StudyAccesion","TotalRequest","TotalApproved","TotalRejected","TotalDownload","AvgApprovalTime")
 
-  total.request <- unlist(lapply(all.studies, function(x) {nrow(submitted.df[submitted.df['Study accesion'] == x,])}))
-  total.approved <- unlist(lapply(all.studies, function(x) {sum(submitted.df[submitted.df['Study accesion'] == x,]['Approved by DAC'] != '')}))
-  total.rejected <- unlist(lapply(all.studies, function(x) {sum(submitted.df[submitted.df['Study accesion'] == x,]['Rejected by DAC'] != '')}))
-  total.download <- unlist(lapply(all.studies, function(x) {sum(submitted.df[submitted.df['Study accesion'] == x,]['Data downloaded'] == 'yes')
-    + sum(submitted.df[submitted.df['Study accesion'] == x,]['Data downloaded'] == 'yes in previous version')}))
-  avg.approval.time <- unlist(lapply(all.studies, function(x) {mean(difftime(to.time(submitted.df[submitted.df['Study accesion'] == x,][,'Approved by DAC']),
-                                                                       to.time(submitted.df[submitted.df['Study accesion'] == x,][,'Submitted by PI']), units = "days"),na.rm = TRUE)}))
-
-  # Derived columns
-  approval.rate <- total.approved / (total.approved + total.rejected)
-  download.rate <- total.download / total.request
-
-  summary.df <- data.frame("StudyAccesion" = all.studies,
-                           "TotalRequest" = total.request,
-                           "TotalApproved" = total.approved,
-                           "TotalRejected" = total.rejected,
-                           "TotalDownload" = total.download,
-                           "AvgApprovalTime" = avg.approval.time,
-                           "ApprovalRate" = approval.rate,
-                           "DownloadRate" = download.rate
-                           )
-
-  # Merge with all DAC studies table
-  print("Merging with all DAC studies table...")
-  big.table <- merge(summary.df,all_nih_dac_studies_table, by.x='StudyAccesion', by.y='Study Accession',all.x=TRUE)
-
-  return(big.table)
+  studies.big.table <- merge(studies.big.table,all_nih_dac_studies_table, by.x='StudyAccesion', by.y='Study Accession',all.x=TRUE)
+  return(studies.big.table)
 }
 
 
