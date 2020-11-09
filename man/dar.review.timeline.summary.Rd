@@ -6,12 +6,12 @@
 \format{
 A data frame with 6 variables:
 \describe{
-  \item{DAC}{The name of the DAC (Data Access Committee)}
-  \item{AvgApprovalTime}{The average number of days for DARs from submitted by PI to be approved by the DAC}
-  \item{MedApprovalTime}{The median number of days for DARs from submitted by PI to be approved by the DAC}
-  \item{DARDailyAvg}{The average number of DAR submitted each day in the given timeframe}
-  \item{DARDailySD}{The standard deviation of DAR submitted each day in the given timeframe}
-  \item{DARTotal}{The total number of DAR submitted in the given timeframe}
+\item{DAC}{The name of the DAC (Data Access Committee)}
+\item{AvgApprovalTime}{The average number of days for DARs from submitted by PI to be approved by the DAC}
+\item{MedApprovalTime}{The median number of days for DARs from submitted by PI to be approved by the DAC}
+\item{DARDailyAvg}{The average number of DAR submitted each day in the given timeframe}
+\item{DARDailySD}{The standard deviation of DAR submitted each day in the given timeframe}
+\item{DARTotal}{The total number of DAR submitted in the given timeframe}
 }
 }
 \usage{

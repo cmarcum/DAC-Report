@@ -6,18 +6,18 @@
 \format{
 A data frame with 12 variables:
 \describe{
-  \item{StudyAccession}{The phs number of the study}
-  \item{TotalRequest}{Total number of DAR submitted by PI for the study in the given timeframe}
-  \item{TotalApproval}{Total number of DAR approved by DAC for the study in the given timeframe}
-  \item{TotalRejected}{Total number of DAR rejected by DAC for the study in the given timeframe}
-  \item{TotalDownloaded}{Total number of times the study is downloaded}
-  \item{AvgApprovalTime}{The average number of days it takes for a DAR for the study to be approved}
-  \item{ApprovalRate}{Proportion of DAR that are approved. Calcualted by TotalApproved / (TotalApproved+TotalRejected)}
-  \item{DownloadRate}{Proportion of DAR that are downloaded. Calculated by TotalDownload / TotalRequest}
-  \item{DAC}{Name of the DAC that submitted the DAR for the study}
-  \item{Study Release Date}{Date in which the study is released}
-  \item{Embargo End Date}{Date in which the embargo of the study is lifted}
-  \item{Study Name}{Name of the study}
+\item{StudyAccession}{The phs number of the study}
+\item{TotalRequest}{Total number of DAR submitted by PI for the study in the given timeframe}
+\item{TotalApproval}{Total number of DAR approved by DAC for the study in the given timeframe}
+\item{TotalRejected}{Total number of DAR rejected by DAC for the study in the given timeframe}
+\item{TotalDownloaded}{Total number of times the study is downloaded}
+\item{AvgApprovalTime}{The average number of days it takes for a DAR for the study to be approved}
+\item{ApprovalRate}{Proportion of DAR that are approved. Calcualted by TotalApproved / (TotalApproved+TotalRejected)}
+\item{DownloadRate}{Proportion of DAR that are downloaded. Calculated by TotalDownload / TotalRequest}
+\item{DAC}{Name of the DAC that submitted the DAR for the study}
+\item{Study Release Date}{Date in which the study is released}
+\item{Embargo End Date}{Date in which the embargo of the study is lifted}
+\item{Study Name}{Name of the study}
 }
 }
 \usage{

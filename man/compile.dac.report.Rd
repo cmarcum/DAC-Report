@@ -10,7 +10,7 @@ compile.dac.report(dac, author, start.date, end.date, ...)
 \item{dac}{String, the name of the DAC from which the report will be generated for, one of
 "CDAC", "ES DAC", "JAAMH", "Kids First DAC", "NCATS", "NCI DAC", "NEI", "NHGRI",
 "NHLBI", "NIAID", "NIAMS", "NICHD", "NIDCD DAC", "NIDCR", "NIDDK", "NIGMS", "NINDS"
-"NINR DAC"}
+"NINR DAC". For a list of all currently supported DAC names call "CDAC", "ES DAC", "JAAMH", "Kids First DAC", "NCATS", "NCI DAC", "NEI", "NHGRI", "NHLBI", "NIAID", "NIAMS", "NICHD", "NIDCD DAC", "NIDCR", "NIDDK", "NIGMS", "NINDS", "NINR DAC"}
 
 \item{author}{String, The name of the author who created this report}
 
@@ -25,7 +25,7 @@ which the analysis will be based on}
 \description{
 Creates a report on the DAR (Data Access Request) status of the given DAC
 (Data Access Commitee) and compare it to the rest of the NIH institutes. The
-generated report will be a word document.
+generated report will be a word document. "CDAC", "ES DAC", "JAAMH", "Kids First DAC", "NCATS", "NCI DAC", "NEI", "NHGRI", "NHLBI", "NIAID", "NIAMS", "NICHD", "NIDCD DAC", "NIDCR", "NIDDK", "NIGMS", "NINDS", "NINR DAC"
 }
 \examples{
 \dontrun{
