@@ -81,32 +81,7 @@ dar.review.timeline.summary <- function(start.date,end.date,df=nih_dac_action_ta
   summary.df <- merge(summary.df,total.downloaded.df,by.x='DAC',by.y='DAC',all.x=TRUE)
   summary.df <- merge(summary.df,previously.downloaded.df,by.x='DAC',by.y='DAC',all.x=TRUE)
 
-  # daily.vector.list <- list()
-  # for (i in 1:nrow(summary.df)) {
-  #   print(sprintf("Computing daily data for %s",summary.df[i,'DAC']))
-  #   daily.vector.list[[i]] <- get.dac.daily.approved.dar.vector(df,summary.df[i,'DAC'],start.date,end.date)
-  # }
-  #
-  # summary.df['DARDailyAvg'] <- unlist(lapply(daily.vector.list,mean))
-  # summary.df['DARDailySD'] <- unlist(lapply(daily.vector.list,stats::sd))
-  # summary.df['DARTotal'] <- unlist(lapply(daily.vector.list,sum))
-
   return(summary.df)
-}
-
-# returns a vector of length (start.date - end.date) where each element = DAR report sent that day
-get.dac.daily.approved.dar.vector <- function(dac.name,start.date,end.date,df=nih_dac_action_table) {
-  dac.df <- df[df['DAC'] == dac.name,]
-  approved.df <- get.df.within.range(dac.df,start.date,end.date,date.col="Approved by DAC")
-  dac.avg.time <- difftime(to.time(approved.df[,"Approved by DAC"]), to.time(approved.df[,"Submitted by PI"]),units = "days")
-  approved.df['time_from_PI_submission_to_DAC_approval'] <- dac.avg.time
-  date.seq <- seq(as.Date(start.date),as.Date(end.date),by="days")
-  dar.number.list <- list()
-  for (i in 1:length(date.seq)) {
-    dar.number.list[i] <- nrow(get.df.within.range(approved.df,date.seq[[i]],date.seq[[i]]))
-  }
-  dar.number.vector <- unlist(dar.number.list)
-  return(dar.number.vector)
 }
 
 # Produce subset of df that falls within the given time range
@@ -221,3 +196,27 @@ get.pi.table <- function(start.date,end.date,action.table.df=nih_dac_action_tabl
   pi.big.table <- merge(pi.big.table,pi.data.downloaded.table,by="PI")
   return(pi.big.table)
 }
+
+# Returns a table with the moving average of all studies approved by dac in the given timeframe
+# TODO confirm whether looking at approved time is intended behavior
+get.approval.time.moving.average <- function(start.date,end.date,action.table.df=nih_dac_action_table) {
+  temp.action.table.df <- get.df.within.range(action.table.df,start.date,end.date,date.col="Approved by DAC")
+  temp.action.table.df$ApprovedMonth <- lubridate::floor_date(as.Date(temp.action.table.df[,'Approved by DAC'], format = "%m/%d/%Y"),"month")
+  temp.action.table.df$ApprovalTime <- difftime(to.time(temp.action.table.df[,"Approved by DAC"]), to.time(temp.action.table.df[,"Submitted by PI"]),units = "days")
+
+  return(temp.action.table.df)
+#
+#   monthly.study.approved.df <- stats::aggregate(temp.action.table.df['ApprovalTime'], by=list(Month=temp.action.table.df$ApprovedMonth), FUN=mean)
+#
+#   temp.df <- data.frame(Month=seq(as.Date(start.date),as.Date(end.date), by='month'))
+#   big.df <- merge(temp.df, monthly.study.approved.df,by='Month', all.x=TRUE)
+#   return(big.df)
+}
+
+
+# Returns a list of currently supported dac names
+get.supported.dacs <- function() {
+  return(paste(shQuote(unique(nih_dac_action_table$DAC)), collapse=", "))
+
+}
+

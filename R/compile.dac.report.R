@@ -2,12 +2,12 @@
 #'
 #' Creates a report on the DAR (Data Access Request) status of the given DAC
 #' (Data Access Commitee) and compare it to the rest of the NIH institutes. The
-#' generated report will be a word document.
+#' generated report will be a word document. `r get.supported.dacs()`
 #'
 #' @param dac String, the name of the DAC from which the report will be generated for, one of
 #' "CDAC", "ES DAC", "JAAMH", "Kids First DAC", "NCATS", "NCI DAC", "NEI", "NHGRI",
 #' "NHLBI", "NIAID", "NIAMS", "NICHD", "NIDCD DAC", "NIDCR", "NIDDK", "NIGMS", "NINDS"
-#' "NINR DAC"
+#' "NINR DAC". For a list of all currently supported DAC names call `r get.supported.dacs()`
 #'
 #' @param author String, The name of the author who created this report
 #' @param start.date String, date in "yyyy-mm-dd" format, the start date of the timeframe
@@ -25,7 +25,7 @@
 #' @export
 compile.dac.report <- function(dac, author, start.date, end.date,...) {
   # Markdown template to use
-  this.file<- system.file("inst", "report.Rmd", package = "DACReportingTool")
+  this.file<- system.file("report.Rmd", package = "DACReportingTool")
 
   title <- paste(toupper(dac), "Data Access Committee dbGaP Activity Report \n", paste(start.date,end.date,sep="-"), sep=" ")
 
@@ -45,6 +45,10 @@ compile.dac.report <- function(dac, author, start.date, end.date,...) {
 
   study.status.table.dac <- filter(study.status.table.dac, study.status.table.dac$Month >= as.Date('2015-01-01'))
 
+  print(study.status.table.dac)
+
+  approval.time.moving.avg.table <- get.approval.time.moving.average(start.date,end.date,dac.specific.action.table)
+
   rmarkdown::render(this.file, params = list(
   title = title,
   start.date = start.date,
@@ -56,6 +60,10 @@ compile.dac.report <- function(dac, author, start.date, end.date,...) {
   study.status.table.all=study.status.table.all,
   study.status.table.dac=study.status.table.dac,
   pi.requests.table.overall=pi.requests.table.overall,
-  pi.requests.table.selected.time=pi.requests.table.selected.time
+  pi.requests.table.selected.time=pi.requests.table.selected.time,
+  approval.time.moving.avg.table=approval.time.moving.avg.table
    ),...)
+
+  shell.exec(system.file("report.docx", package="DACReportingTool"))
+
 }

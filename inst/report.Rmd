@@ -13,6 +13,7 @@ params:
   study.status.table.dac: "study.status.table.dac"
   pi.requests.table.overall: "pi.requests.table.overall"
   pi.requests.table.selected.time: "pi.requests.table.selected.time"
+  approval.time.moving.avg.table: "approval.time.moving.avg.table"
 --- 
 
 ---
@@ -90,25 +91,7 @@ fig2.caption <- sprintf("Comparison of Cummulative DAR Made to and Studies Relea
 ```
 
 ```{r fig.cap=fig2.caption, echo=FALSE, warning=FALSE ,message=FALSE, figures-side, fig.show="hold", out.width="50%"}
-# p <- ggplot(study.status.table.all, aes(x=Month)) +
-#   geom_line(aes(y=TotalRequestsCummulative, colour="Total Requests"), size=2) +
-#   geom_line(aes(y=StudiesReleasedCummulative, colour="Studies Released"), size=2) +
-#   scale_color_manual("",
-#                      values = c("Total Requests"="cornflowerblue", "Studies Released"="coral3")) +
-#   theme(legend.position = "bottom") +
-#   scale_y_continuous(trans='log2', n.breaks = 8) +
-#   xlab("Year") +
-#   ylab("DAR Total / Studies Released (log scale)")
-#   
-# rect <- data.frame(xmin=as.Date(lubridate::floor_date(as.Date(params$start.date))), xmax=as.Date(lubridate::floor_date(as.Date(params$end.date))), ymin=0, ymax=Inf)
-# 
-# p <- p + geom_rect(data=rect, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax),
-#               color="gray20",
-#               alpha=0.2,
-#               inherit.aes = FALSE)
-# p
-
-p2 <- ggplot(study.status.table.dac, aes(x=Month)) +
+study.status.table.dac.plot <- ggplot(study.status.table.dac, aes(x=Month)) +
   geom_line(aes(y=TotalRequestsCummulative, colour="Total Requests"), size=2) +
   geom_line(aes(y=StudiesReleasedCummulative, colour="Studies Released"), size=2) +
   scale_color_manual("",
@@ -122,11 +105,11 @@ p2 <- ggplot(study.status.table.dac, aes(x=Month)) +
   
 rect2 <- data.frame(xmin=as.Date(lubridate::floor_date(as.Date(params$start.date))), xmax=as.Date(lubridate::floor_date(as.Date(params$end.date))), ymin=0, ymax=Inf)
 
-p2 <- p2 + geom_rect(data=rect2, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax),
+study.status.table.dac.plot <- study.status.table.dac.plot + geom_rect(data=rect2, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax),
               color="gray20",
               alpha=0.2,
               inherit.aes = FALSE)
-p2
+study.status.table.dac.plot
 ```
 
 ```{r fig.cap="Comparison of Cummulative DAR Made and Studies Released Per Month in current DAC", echo=FALSE, warning=FALSE ,message=FALSE, include=FALSE, fig.align="center"}
@@ -147,6 +130,27 @@ p <- p + geom_rect(data=rect, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax),
               alpha=0.2,
               inherit.aes = FALSE)
 p
+```
+
+
+```{r fig.cap="Moving Average of DAR Submission to Approval Time", echo=FALSE, warning=FALSE ,message=FALSE}
+# approval.time.table.plot <- ggplot(approval.time.moving.avg.table, aes(x=ApprovedMonth,y=ApprovalTime)) +
+#   geom_point() +
+#   stat_summary(aes(y=ApprovalTime,group=1), fun = mean, colour="cornflowerblue", geom = "line", group=1, size=1) +
+#   ylim(0,50)
+
+approval.time.table.plot <- ggplot(approval.time.moving.avg.table, aes(factor(ApprovedMonth), ApprovalTime)) +
+  geom_boxplot(outlier.shape = NA) + 
+  coord_cartesian(ylim = quantile(approval.time.moving.avg.table$ApprovalTime, c(0.1, 0.9))) +
+  # scale_x_discrete(labels = format(as.Date(approval.time.moving.avg.table$ApprovedMonth), "%m/%Y")) +
+  scale_y_continuous(n.breaks = 8) +
+  stat_summary(fun=median, colour="cornflowerblue", aes(y=ApprovalTime,group=1),
+               geom="line", group=1, size=2) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
+  xlab("Month") +
+  ylab("Time (Days)")
+  
+approval.time.table.plot
 ```
 
 
