@@ -46,10 +46,6 @@ dac.action.table.update <- function(update.to=format(Sys.Date(),"%m/%d/%Y"),over
   load(system.file("data", "nih_dac_action_table.rda", package = "DACReportingTool"))
   update.to <- as.Date(update.to,"%m/%d/%Y")
   cur.table.latest <- get.latest.approved.dar.date()
-  if (cur.table.latest >= update.to) {
-    stop('The table is already updated to the specified date!')
-  }
-
   # Get table starting from latest date, append to current table
   new.table <- get.all.dac.action.table(format(cur.table.latest,"%m/%d/%Y"),format(update.to,"%m/%d/%Y"))
   combined.table <- dplyr::bind_rows(nih_dac_action_table,new.table)
@@ -67,11 +63,12 @@ dac.action.table.update <- function(update.to=format(Sys.Date(),"%m/%d/%Y"),over
   }
 }
 
-get.all.nih.dac.studies.table <- function(start.date,end.date) {
+# Retrieves table a1 (table is time invariant)
+get.all.nih.dac.studies.table <- function(start.date="01/01/2000",end.date=format(Sys.Date(),"%m/%d/%Y")) {
   table.url <- "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?stDate=%s&endDate=%s&retTable=tablea1"
   table.xpath <- "//tr"
   request.url <- sprintf(table.url,utils::URLencode(start.date,reserved = TRUE), utils::URLencode(end.date,reserved = TRUE))
-  print(sprintf("Sending request for All NIH DAC Studies (tablea1) table from %s to %s...",start.date,end.date))
+  print("Sending request for All NIH DAC Studies (tablea1) table")
   return(get.data.use.summary.table(request.url,table.xpath))
 }
 
