@@ -1,22 +1,20 @@
 # DAC-Report
+
+![R-CMD-check](https://github.com/cmarcum/DAC-Report/workflows/R-CMD-check/badge.svg?branch=devel)
+
 This project is internal for a POC of automatic dbGaP reporting for Data Access Committees
 
 ![logo](icons/dac.png)
 
-Currently we use the [dbGaP Data Access and Use Report page](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi) as our primary data source and this package serve as a programmatic interface to easily retrieve the data. 
-
-# Workflow
-The package stores all DAC action table data locally [(example)](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?DAC=all&actType=all&stDate=04/23/2020&endDate=10/22/2020]) till 10/22/2020. To access the data simply call:
+# Data Source
+We use the [dbGaP Data Access and Use Report page](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi) as our primary data source and this package serve as a programmatic interface to easily retrieve the data and automatically generate data report. Currently the package stores all DAC action table data (last update: 11/04/2020) locally [(example)](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?DAC=all&actType=all&stDate=04/23/2020&endDate=10/22/2020]). To load the data into R environment use:
 ```
-my_table <- DACReportingTool::nih_dac_action_table
+data("nih_dac_action_table")"
 ```
-To update the dataframe with the latest data you would need to access the `/data` directory which means you need to clone the repository. After doing so, you can build the package and update the data by doing:
+and use this to update the table with the latest data
 ```
-> library('devtools')
-> load_all()
-> update.dac.action.table()
+dac.action.table.update()
 ```
-and it will update the table with the latest data! (Remember to reload!)
 
 # Data Available
 
@@ -29,3 +27,6 @@ Returns a summary dataframe of all DAC which had DAR approved in the given timef
 
 `dar.review.timeline.summary()`
 Returns a summary dataframe of all studies made in the given timeframe. Note that some studies can be both approved and rejected (ex. approved but later rejected ), or neither (still in process of approval) so it isn't necessary that Total Request = Approval + Reject. See documentation for table schema
+
+For complete list of all available table, see files under the R/ directory and their associated documentation.
+
