@@ -20,7 +20,7 @@
 #' @return dataframe
 #' @export
 #'
-#' @examples \dotnrun {
+#' @examples \dontrun {
 #' > get.pi.table("2020-01-01","2020-12-31")
 #'     PI DAR DAC Project Approved by DAC Rejected by DAC Data downloaded
 #' 1   10008   1   1       1               1               0               0
