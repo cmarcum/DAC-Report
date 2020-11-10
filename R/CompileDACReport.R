@@ -33,13 +33,13 @@ compile.dac.report <- function(dac, author, start.date, end.date,...) {
   timeline.summary.table <- dar.review.timeline.summary(start.date,end.date)
   study.summary.table <- get.study.summary.table(start.date,end.date)
 
-  study.status.table.all <- get.monthly.study.status('2000-01-01',Sys.Date())
+  study.status.table.all <- get.monthly.study.status.table('2000-01-01',Sys.Date())
   study.status.table.all <- study.status.table.all[study.status.table.all$Month >= as.Date('2015-01-01'),]
 
   pi.requests.table.overall <- get.pi.table('2000-01-01',Sys.Date())
   pi.requests.table.selected.time <- get.pi.table(start.date,end.date)
 
-  study.status.table.dac <- get.monthly.study.status('2000-01-01',Sys.Date(), dac.specific.studies.table,dac.specific.action.table)
+  study.status.table.dac <- get.monthly.study.status.table('2000-01-01',Sys.Date(), dac.specific.studies.table,dac.specific.action.table)
   print(study.status.table.dac)
 
   study.status.table.dac <- study.status.table.dac[study.status.table.dac$Month >= as.Date('2015-01-01'),]
