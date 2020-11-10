@@ -11,9 +11,9 @@ We use the [dbGaP Data Access and Use Report page](https://www.ncbi.nlm.nih.gov/
 ```
 data("nih_dac_action_table")
 ```
-and use this to update the table with the latest data
+and use this to update all the locally stored tables with the latest data
 ```
-dac.action.table.update()
+update.every.table()
 ```
 
 # Data Available
