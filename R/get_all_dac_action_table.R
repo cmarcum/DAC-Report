@@ -84,11 +84,11 @@ get.all.dac.action.table <- function(start.date,end.date) {
 #' @return (optionally) the updated table
 #'
 #' @examples \dontrun{
-#' update.dac.action.table()
+#' dac.action.table.update()
 #' }
 #'
 #' @export
-update.dac.action.table <- function(update.to=format(Sys.Date(),"%m/%d/%Y"),overwrite=TRUE,return.table=FALSE) {
+dac.action.table.update <- function(update.to=format(Sys.Date(),"%m/%d/%Y"),overwrite=TRUE,return.table=FALSE) {
   print("Updating DAC Action Table...")
   update.to <- as.Date(update.to,"%m/%d/%Y")
   load(system.file("data", "nih_dac_action_table.rda", package = "DACReportingTool"))
