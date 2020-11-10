@@ -90,15 +90,13 @@ get.all.dac.action.table <- function(start.date,end.date) {
 #' @export
 dac.action.table.update <- function(update.to=format(Sys.Date(),"%m/%d/%Y"),overwrite=TRUE,return.table=FALSE) {
   print("Updating DAC Action Table...")
-  update.to <- as.Date(update.to,"%m/%d/%Y")
   load(system.file("data", "nih_dac_action_table.rda", package = "DACReportingTool"))
-  converted.date <- as.POSIXct(nih_dac_action_table[,'Approved by DAC'], format="%m/%d/%Y %H:%M", tz="EST")
-
-  # Use the latest date in the approved by dac column as the last updated date
-  cur.table.latest <- as.Date(max(converted.date ,na.rm = TRUE))
+  update.to <- as.Date(update.to,"%m/%d/%Y")
+  cur.table.latest <- get.latest.approved.dar.date()
   if (cur.table.latest >= update.to) {
     stop('The table is already updated to the specified date!')
   }
+
   # Get table starting from latest date, append to current table
   new.table <- get.all.dac.action.table(format(cur.table.latest,"%m/%d/%Y"),format(update.to,"%m/%d/%Y"))
   combined.table <- dplyr::bind_rows(nih_dac_action_table,new.table)
@@ -107,6 +105,7 @@ dac.action.table.update <- function(update.to=format(Sys.Date(),"%m/%d/%Y"),over
   combined.table <- combined.table[!duplicated(combined.table$DAR, fromLast=T),]
   nih_dac_action_table <- combined.table
   print("DAC Action Table update completed")
+
   if (overwrite) {
     save(nih_dac_action_table,file = system.file("data", "nih_dac_action_table.rda", package = "DACReportingTool"))
   }
