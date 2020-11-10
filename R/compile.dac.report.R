@@ -2,12 +2,10 @@
 #'
 #' Creates a report on the DAR (Data Access Request) status of the given DAC
 #' (Data Access Commitee) and compare it to the rest of the NIH institutes. The
-#' generated report will be a word document. `r get.supported.dacs()`
+#' generated report will be a word document.
 #'
 #' @param dac String, the name of the DAC from which the report will be generated for, one of
-#' "CDAC", "ES DAC", "JAAMH", "Kids First DAC", "NCATS", "NCI DAC", "NEI", "NHGRI",
-#' "NHLBI", "NIAID", "NIAMS", "NICHD", "NIDCD DAC", "NIDCR", "NIDDK", "NIGMS", "NINDS"
-#' "NINR DAC". For a list of all currently supported DAC names call `r get.supported.dacs()`
+#' `r get.supported.dacs()`
 #'
 #' @param author String, The name of the author who created this report
 #' @param start.date String, date in "yyyy-mm-dd" format, the start date of the timeframe
@@ -36,14 +34,15 @@ compile.dac.report <- function(dac, author, start.date, end.date,...) {
   study.summary.table <- get.study.summary.table(start.date,end.date)
 
   study.status.table.all <- get.monthly.study.status('2000-01-01',Sys.Date())
-  study.status.table.all <- filter(study.status.table.all, study.status.table.all$Month >= as.Date('2015-01-01'))
-
-  study.status.table.dac <- get.monthly.study.status('2000-01-01',Sys.Date(), dac.specific.studies.table,dac.specific.action.table)
+  study.status.table.all <- study.status.table.all[study.status.table.all$Month >= as.Date('2015-01-01'),]
 
   pi.requests.table.overall <- get.pi.table('2000-01-01',Sys.Date())
   pi.requests.table.selected.time <- get.pi.table(start.date,end.date)
 
-  study.status.table.dac <- filter(study.status.table.dac, study.status.table.dac$Month >= as.Date('2015-01-01'))
+  study.status.table.dac <- get.monthly.study.status('2000-01-01',Sys.Date(), dac.specific.studies.table,dac.specific.action.table)
+  print(study.status.table.dac)
+
+  study.status.table.dac <- study.status.table.dac[study.status.table.dac$Month >= as.Date('2015-01-01'),]
 
   print(study.status.table.dac)
 
