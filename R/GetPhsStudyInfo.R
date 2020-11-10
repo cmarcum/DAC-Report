@@ -107,7 +107,7 @@ update.phs.studies.table <- function(overwrite=TRUE,return.table=FALSE,wait.for=
   print("phs studies table update completed")
   if (overwrite) {
     phs_studies_table <- big.df
-    save(phs_studies_table,file = system.file("data", "phs_studies_table.rda", package = "DACReportingTool"))
+    save(phs_studies_table,file = system.file("data", "phs_studies_table.rda", package = "DACReportingTool"), compress = "xz")
   }
   if (return.table) {
     return(big.df)

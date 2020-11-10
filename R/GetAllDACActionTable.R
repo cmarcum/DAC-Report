@@ -60,7 +60,7 @@ dac.action.table.update <- function(update.to=format(Sys.Date(),"%m/%d/%Y"),over
   print("DAC Action Table update completed")
 
   if (overwrite) {
-    save(nih_dac_action_table,file = system.file("data", "nih_dac_action_table.rda", package = "DACReportingTool"))
+    save(nih_dac_action_table,file = system.file("data", "nih_dac_action_table.rda", package = "DACReportingTool"), compress = "xz")
   }
   if (return.table) {
     return(nih_dac_action_table)
