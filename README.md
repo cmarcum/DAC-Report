@@ -16,7 +16,9 @@ and use this to update all the locally stored tables with the latest data
 update.every.table()
 ```
 
-# Data Available
+# Tables Available
+
+One of the main goals of the package is to make summary statistic of DAR data easily accessible. Here are some of the tables you can easily compute using this package
 
 `nih_dac_action_table`, for table schema see and example [link](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?DAC=all&actType=all&stDate=04/23/2020&endDate=10/22/2020)
 
@@ -38,4 +40,4 @@ To generate a summary report based on the current data. Use
 compile.dac.report('NIAID','Hoyin Chu, Christopher Marcum', '2015-01-01', '2019-12-31')
 ```
 
-
+And a .docx will be generated containing figures and report. Close the opened .docx file before generating a new one to avoid errors.

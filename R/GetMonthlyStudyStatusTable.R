@@ -35,6 +35,7 @@
 #'
 #'
 get.monthly.study.status.table <- function(start.date,end.date,studies.df=all_nih_dac_studies_table,action.table.df=nih_dac_action_table) {
+
   # Aggregate of studies released by month
   temp_studies_table <- studies.df
   temp_studies_table$ReleaseMonth <- lubridate::floor_date(as.Date(temp_studies_table[,'Study Release Date'], format = "%m/%d/%Y"),"month")

@@ -43,8 +43,6 @@
 #'
 #' @export
 get.study.summary.table <- function(start.date = '2000-01-01',end.date=format(Sys.Date()), df=nih_dac_action_table) {
-  print('Computing Study Summary Table...')
-
   submitted.df <- get.df.within.range(df,start.date,end.date,date.col="Submitted by PI")
   submitted.df$`TimeToApproval` <- difftime(to.time(submitted.df[,'Approved by DAC']),to.time(submitted.df[,'Submitted by PI']), units="days")
 

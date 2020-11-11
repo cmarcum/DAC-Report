@@ -30,22 +30,23 @@ compile.dac.report <- function(dac, author, start.date, end.date,...) {
   dac.specific.studies.table <- all_nih_dac_studies_table[all_nih_dac_studies_table["DAC"] == dac,]
   dac.specific.action.table <- nih_dac_action_table[nih_dac_action_table["DAC"] == dac,]
 
+  print('Computing Review Timelime Summary Table...')
   timeline.summary.table <- dar.review.timeline.summary(start.date,end.date)
+
+  print('Computing Study Summary Table...')
   study.summary.table <- get.study.summary.table(start.date,end.date)
 
+  print('Computing Monthly Study Status Table...')
   study.status.table.all <- get.monthly.study.status.table('2000-01-01',Sys.Date())
   study.status.table.all <- study.status.table.all[study.status.table.all$Month >= as.Date('2015-01-01'),]
+  study.status.table.dac <- get.monthly.study.status.table('2000-01-01',Sys.Date(), dac.specific.studies.table,dac.specific.action.table)
+  study.status.table.dac <- study.status.table.dac[study.status.table.dac$Month >= as.Date('2015-01-01'),]
 
+  print('Computing PI Table...')
   pi.requests.table.overall <- get.pi.table('2000-01-01',Sys.Date())
   pi.requests.table.selected.time <- get.pi.table(start.date,end.date)
 
-  study.status.table.dac <- get.monthly.study.status.table('2000-01-01',Sys.Date(), dac.specific.studies.table,dac.specific.action.table)
-  print(study.status.table.dac)
-
-  study.status.table.dac <- study.status.table.dac[study.status.table.dac$Month >= as.Date('2015-01-01'),]
-
-  print(study.status.table.dac)
-
+  print('Computing Monthly Approval Time Median Table...')
   approval.time.moving.avg.table <- get.approval.time.moving.average(start.date,end.date,dac.specific.action.table)
 
   rmarkdown::render(this.file, params = list(
