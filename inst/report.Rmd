@@ -84,7 +84,7 @@ phs.popular.this.dac.total.request <- dac.study.summary.table.ordered[1,]['Total
 ```
 
 
-During this reporting period, study `r phs.popular.this.dac` (`r phs.popular.this.dac.study.name`) has been the most requested dataset from the `r dac` DAC with `r phs.popular.this.dac.total.request` requests. 
+During this reporting period, study `r phs.popular.this.dac` (`r phs.popular.this.dac.study.name`) was the requested dataset from the `r dac` DAC with `r phs.popular.this.dac.total.request` requests. 
 
 ```{r include=FALSE}
 fig2.caption <- sprintf("Comparison of Cummulative DAR Made to and Studies Released by %s",dac)
