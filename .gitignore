@@ -43,6 +43,3 @@ docs/
 
 # translation temp files
 po/*~
-
-# generated report
-*.docx
