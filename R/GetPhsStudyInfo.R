@@ -38,6 +38,25 @@ get.study.key <- function(phs.id) {
   return(NA)
 }
 
+# Retrieves the number of publications associated to the given phs id
+get.phs.publications <- function(phs.id) {
+  base.url <- "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/GetReference.cgi?study_id=%s&study_key=%s&page_number=1"
+  study.key <- get.study.key(phs.id)
+  request.url <- sprintf(base.url,phs.id,study.key)
+  webpage <- xml2::read_html(request.url)
+  webpage.as.list <- xml2::as_list(webpage)
+  if (length(webpage.as.list) > 0) {
+    total.pub.div <- webpage.as.list$html$body$div
+    if(length(total.pub.div) > 1) {
+      total.pub.string <- total.pub.div[[1]]
+      total.pub <- as.numeric(gsub("[^0-9]", "", total.pub.string))
+      return(total.pub)
+    }
+  }
+  return(NA)
+}
+
+
 # Returns a table with column Consent group, Is IRB required, DAC, Numebr of participants
 # of the given phs id and study key
 get.phs.restricted.access.table <- function(phs.id,study.key) {
