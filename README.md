@@ -7,18 +7,19 @@ This project is internal for a POC of automatic dbGaP reporting for Data Access 
 ![logo](icons/dac.png)
 
 # Data Source
-We use the [dbGaP Data Access and Use Report page](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi) as our primary data source and this package serve as a programmatic interface to easily retrieve the data and automatically generate data report. Currently the package stores all DAC action table data (last update: 11/04/2020) locally [(example)](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?DAC=all&actType=all&stDate=04/23/2020&endDate=10/22/2020]). To load the data into R environment use:
+We use the [dbGaP Data Access and Use Report page](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi) as our primary data source and this package serves as a programmatic interface to easily retrieve the data and automatically generate an DAC-specific data report. Currently the package stores all DAC action data (last update: 11/04/2020) locally [(example)](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?DAC=all&actType=all&stDate=04/23/2020&endDate=10/22/2020]). To load the data into R environment use:
 ```
+library(DACReportingTool)
 data("nih_dac_action_table")
 ```
-and use this to update all the locally stored tables with the latest data
+And to update all locally stored data with the latest information from dbGaP, use:
 ```
 update.every.table()
 ```
 
 # Tables Available
 
-One of the main goals of the package is to make summary statistic of DAR data easily accessible. Here are some of the tables you can easily compute using this package
+One of the main goals of the package is to make summary statistics of DAC activities data easily accessible. Here are some of the tables that can be computed using this package:
 
 `nih_dac_action_table`, for table schema see and example [link](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?DAC=all&actType=all&stDate=04/23/2020&endDate=10/22/2020)
 
@@ -34,10 +35,10 @@ For a complete list of all available tables, see files under the R/ directory an
 
 # Report Generation
 
-To generate a summary report based on the current data. Use
+One of the features of this package is the ability to generate a DAC-specific summary report for a given window of time. For example, to generate the NIAID DAC report for all activities occurring between the first of January, 2015 and the end of June, 2015: 
 
 ```
-compile.dac.report('NIAID','Hoyin Chu, Christopher Marcum', '2015-01-01', '2019-12-31')
+compile.dac.report(dac='NIAID',author='Hoyin Chu, Christopher Marcum', start.date='2015-01-01', end.date='2015-06-30')
 ```
 
-And a .docx will be generated containing figures and report. Close the opened .docx file before generating a new one to avoid errors.
+This function uses an internal R Markdown template that compiles its output to a Microsoft Word (.docx) document. The report will automatically open using whatever compatible software you have available (i.e., MS-Word, Office 365, LibreOffice). The report contains figures, tables, and basic summary interpretation. Be sure to save this report to your Desktop or other appropriate location as it is only stored in a temporary location while it's open. Close the opened .docx file before generating a new one to avoid errors.
