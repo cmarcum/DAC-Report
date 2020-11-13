@@ -8,6 +8,8 @@
 #'   \item{TotalRequests}{The number of requests made that made in the given DAC action information dataframe}
 #'   \item{StudiesReleasedCummulative}{The cummulative number of studies released up until that row}
 #'   \item{TotalRequestsCummulative}{The cummulative number of DAR made up until that row}
+#'   \item{StudiesReleasedGrowth}{The percentage growth of studies released compared to previous month}
+#'   \item{TotalRequestsGrowth}{The percentage growth of DAR compared to previous month}
 #' }
 #'
 #' @param start.date String, date in 'yyyy-mm-dd' format. Start date of the timeframe
@@ -22,15 +24,15 @@
 #'
 #' @examples \dontrun{
 #' > get.monthly.study.status('2020-01-01','2020-12-31')
-#'         Month StudiesReleased TotalRequests StudiesReleasedCummulative TotalRequestsCummulative
-#' 1  2020-01-01              17          1514                         17                     1514
-#' 2  2020-02-01              29          2837                         46                     4351
-#' 3  2020-03-01              26          2696                         72                     7047
-#' 4  2020-04-01              30          3261                        102                    10308
-#' 5  2020-05-01              21          2922                        123                    13230
-#' 6  2020-06-01              11          3716                        134                    16946
-#' 7  2020-07-01              16          3144                        150                    20090
-#' 8  2020-08-01               8          3131                        158                    23221
+#'         Month StudiesReleased TotalRequests StudiesReleasedCummulative TotalRequestsCummulative ...
+#' 1  2020-01-01              17          1514                         17                     1514 ...
+#' 2  2020-02-01              29          2837                         46                     4351 ...
+#' 3  2020-03-01              26          2696                         72                     7047 ...
+#' 4  2020-04-01              30          3261                        102                    10308 ...
+#' 5  2020-05-01              21          2922                        123                    13230 ...
+#' 6  2020-06-01              11          3716                        134                    16946 ...
+#' 7  2020-07-01              16          3144                        150                    20090 ...
+#' 8  2020-08-01               8          3131                        158                    23221 ...
 #' }
 #'
 #'
@@ -59,6 +61,8 @@ get.monthly.study.status.table <- function(start.date,end.date,studies.df=all_ni
 
   big.df$StudiesReleasedCummulative <- cumsum(big.df[,"StudiesReleased"])
   big.df$TotalRequestsCummulative <- cumsum(big.df[,"TotalRequests"])
+  big.df$StudiesReleasedGrowth <- big.df$StudiesReleasedCummulative / lag(big.df$StudiesReleasedCummulative) - 1
+  big.df$TotalRequestsGrowth <- big.df$TotalRequestsCummulative / lag(big.df$TotalRequestsCummulative) - 1
 
   return(big.df)
 }

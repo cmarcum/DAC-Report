@@ -28,6 +28,7 @@ library(ggplot2)
 library(tidyverse)
 library(gridExtra)
 library(latticeExtra)
+library(hrbrthemes)
 dac <- params$dac
 
 dac.total.dars <- nrow(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,])
@@ -193,43 +194,68 @@ study.released.growth.plot
 
 # Other Comparisons
 
+
 ```{r include=FALSE}
-fig2.caption <- sprintf("Comparison of Cummulative DAR Made to and Studies Released by %s",dac)
+dual.y.fig.caption <- sprintf("Comparison of Requests Received and Studies Released by %s", dac)
 ```
 
-```{r fig.cap=fig2.caption, echo=FALSE, warning=FALSE ,message=FALSE, figures-side, fig.show="hold", out.width="50%"}
+
+```{r fig.cap=dual.y.fig.caption, echo=FALSE, warning=FALSE, message=FALSE}
+# A few constants
+coeff <- 100
+coeff <- max(study.status.table.dac$TotalRequestsCummulative)/max(study.status.table.dac$StudiesReleasedCummulative)
+
+comparison.plot <- ggplot(study.status.table.dac, aes(x=Month)) +
+  geom_line(aes(y=StudiesReleasedCummulative), size=2, color="coral3") +
+  geom_line(aes(y=TotalRequestsCummulative/coeff), size=2, color="cornflowerblue") +
+  scale_y_continuous(
+    # Features of the first axis
+    name = "Studies Released\n",
+    breaks = scales::pretty_breaks(n = 8),
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*coeff, name="Requests Received\n", breaks = scales::pretty_breaks(n = 8))
+  ) +
+  theme(
+    axis.title.y = element_text(color = "coral3", size=13),
+    axis.title.y.right = element_text(color = "cornflowerblue", size=13),
+    axis.ticks.y.left = element_line("coral3"),
+    axis.ticks.y.right = element_line("cornflowerblue"),
+    axis.text.y.left = element_text(color = "coral3", size=13),
+    axis.text.y.right = element_text(color = "cornflowerblue", size=13),
+  ) +
+  xlab("Year")
+
+rect3 <- data.frame(xmin=as.Date(lubridate::floor_date(as.Date(params$start.date))), xmax=as.Date(lubridate::floor_date(as.Date(params$end.date))), ymin=0, ymax=Inf)
+
+comparison.plot <- comparison.plot + geom_rect(data=rect3, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax),color="transparent", fill="orange", alpha=0.3, inherit.aes = FALSE)
+
+comparison.plot
+```
+
+```{r include=FALSE}
+growth.compare.caption <- sprintf("Comparison of DAR Growth and Studies Released Growth for %s",dac)
+```
+
+```{r fig.cap=growth.compare.caption, echo=FALSE, warning=FALSE ,message=FALSE, figures-side, fig.show="hold", out.width="50%"}
 study.status.table.dac.plot <- ggplot(study.status.table.dac, aes(x=Month)) +
-  geom_line(aes(y=TotalRequestsCummulative, colour="Total Requests"), size=2) +
-  geom_line(aes(y=StudiesReleasedCummulative, colour="Studies Released"), size=2) +
+  geom_line(aes(y=TotalRequestsGrowth, colour="Total Requests Growth"), size=2) +
+  geom_line(aes(y=StudiesReleasedGrowth, colour="Studies Released Growth"), size=2) +
   scale_color_manual("",
-                     values = c("Total Requests"="cornflowerblue","Studies Released"="coral3")) +
+                     values = c("Total Requests Growth"="cornflowerblue","Studies Released Growth"="coral3")) +
   theme(legend.position = "bottom") +
   scale_x_date(date_breaks = "6 month", date_labels = '%m/%Y') +
-  scale_y_continuous(n.breaks = 8) +
+  scale_y_continuous(n.breaks = 8, labels = function(x) paste0(x*100, "%")) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
   xlab("Year") +
-  ylab("DAR Total / Studies Released")
+  ylab("Growth (%)")
   
 rect2 <- data.frame(xmin=as.Date(lubridate::floor_date(as.Date(params$start.date))), xmax=as.Date(lubridate::floor_date(as.Date(params$end.date))), ymin=0, ymax=Inf)
 
-study.status.table.dac.plot <- study.status.table.dac.plot + geom_rect(data=rect2, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax),
-              color="gray20",
-              alpha=0.2,
-              inherit.aes = FALSE)
+study.status.table.dac.plot <- study.status.table.dac.plot + geom_rect(data=rect2, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax),color="transparent", fill="orange", alpha=0.3, inherit.aes = FALSE)
 study.status.table.dac.plot
-
-# total.request.plot <- ggplot(study.status.table.dac, aes(x=Month)) +
-#   geom_line(aes(y=TotalRequestsCummulative), size=2, color="cornflowerblue")
-# total.studies.plot <- ggplot(study.status.table.dac, aes(x=Month)) +
-#   geom_line(aes(y=StudiesReleasedCummulative), size=2, color="coral3")
-# grid.arrange(total.request.plot, total.studies.plot, ncol=2)
-
-# obj1 <- xyplot(TotalRequestsCummulative ~ Month, study.status.table.dac, type = "l" , lwd=2, col="cornflowerblue")
-# obj2 <- xyplot(StudiesReleasedCummulative ~ Month, study.status.table.dac, type = "l", lwd=2, col="coral3")
-#  
-# # --> Make the plot with second y axis:
-# doubleYScale(obj1, obj2,  text = c("TotalRequestsCummulative", "StudiesReleasedCummulative"), add.ylab2 = TRUE, use.style=FALSE )
 ```
+
+
 
 ---
 
