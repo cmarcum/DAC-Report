@@ -1,0 +1,262 @@
+---
+output: 
+ bookdown::word_document2: default
+params:
+  title: "title"
+  author: "author"
+  start.date: "start.date"
+  end.date: "end.date"
+  dac: "DAC"
+  timeline.summary.table: "timeline.summary.table"
+  study.summary.table: "study.summary.table"
+  study.status.table.all: "study.status.table.all"
+  study.status.table.dac: "study.status.table.dac"
+  pi.requests.table.overall: "pi.requests.table.overall"
+  pi.requests.table.selected.time: "pi.requests.table.selected.time"
+  approval.time.moving.avg.table: "approval.time.moving.avg.table"
+--- 
+
+---
+title: `r params$title`
+author: `r params$author`
+date: `r format(Sys.time(), '%d %B, %Y')`
+---
+
+```{r, include=FALSE}
+# Loads variables to be reported
+library(ggplot2)
+library(tidyverse)
+library(gridExtra)
+library(latticeExtra)
+library(hrbrthemes)
+dac <- params$dac
+
+dac.total.dars <- nrow(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,])
+total.number.of.projects <- length(unique(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,'Project']))
+
+dac.row <- timeline.summary.table[timeline.summary.table['DAC'] == dac,]
+
+num.dars.in.window <- dac.row[,'TotalRequests']
+number.of.accepted <- dac.row[,'TotalApproved']
+number.of.rejected <- dac.row[,'TotalRejected']
+
+avg.accept <- dac.row[,'AvgApprovalTime']
+avg.reject <- dac.row[,'AvgRejectionTime']
+
+dac.total.dars <- nrow(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,])
+dac.total.project <- length(unique(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,'Project']))
+
+avg.final <- (avg.accept*number.of.accepted + avg.reject*number.of.rejected) / (number.of.accepted+number.of.rejected)
+```
+
+The `r dac` Data Access Committee (DAC) currently manages `r dac.total.dars` data access requests (DARs) for access to `r total.number.of.projects` projects in dbGaP.  
+
+# Data Access Requests
+
+Between `r params$start.date` and `r params$end.date` `r dac` reviewed `r num.dars.in.window` DARs. Of these, `r number.of.accepted` were accepted while `r number.of.rejected` were rejected.  The average amount of time from when the Principle Investigator (PI) submited a DAR to the final decision by the DAC was `r round(avg.final,1)` days.  The average time to an accepted decision was `r round(avg.accept,1)` days, while the average time to a rejected decision was `r round(avg.reject,1)` days.  Figure \@ref(fig:compline) is a barplot comparing the `r dac` DAC to time to final decision to the average across all NIH DACs during the same time interval.  
+
+```{r compline, fig.cap="Comparison of Time to Final Decision", echo=FALSE, warning=FALSE ,message=FALSE}
+timeline.summary.table <- timeline.summary.table %>% mutate(ToHighlight = ifelse( DAC == params$dac, "yes", "no" ))
+timeline.summary.table$AvgApprovalTime <- as.numeric(timeline.summary.table$AvgApprovalTime, units="days")
+timeline.summary.table<- timeline.summary.table[order(timeline.summary.table$AvgApprovalTime, decreasing=TRUE),]
+timeline.summary.table$DAC <- factor(timeline.summary.table$DAC, levels=unique(as.character(timeline.summary.table$DAC)))
+p <- ggplot(data=timeline.summary.table, aes(x=DAC, y=AvgApprovalTime, fill = ToHighlight)) +
+  geom_bar(stat="identity") +
+  # geom_text(aes(label=paste(round(AvgApprovalTime,1),'days'))) +
+  scale_y_continuous(breaks = seq(0, max(timeline.summary.table$AvgApprovalTime, na.rm = TRUE), by = 7)) +
+  scale_fill_manual(values = c("yes"="cornflowerblue","no"="gray"), guide = FALSE) +
+  coord_flip() +
+  ylab("Average Approval Time (days)")
+p
+```
+
+```{r include=FALSE}
+dar.access.fig.cap <- sprintf("Total Data Access Requests Submitted to %s", dac)
+```
+
+
+```{r fig.cap=dar.access.fig.cap, echo=FALSE, warning=FALSE ,message=FALSE}
+dar.request.growth.plot <- ggplot(study.status.table.dac, aes(x=Month,y=TotalRequestsCummulative)) +
+  geom_line(size=2, color="cornflowerblue") +
+  xlab("Year") +
+  ylab("DAR Total")
+rect <- data.frame(xmin=as.Date(lubridate::floor_date(as.Date(params$start.date))), xmax=as.Date(lubridate::floor_date(as.Date(params$end.date))), ymin=0, ymax=Inf)
+dar.request.growth.plot <- dar.request.growth.plot + geom_rect(data=rect, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax),
+              color="transparent", fill="orange", alpha=0.3, inherit.aes = FALSE)
+dar.request.growth.plot
+```
+
+
+```{r fig.cap="DAR Processing Time: From PI Submission to DAC Approval", echo=FALSE, warning=FALSE ,message=FALSE}
+ylim1 <- boxplot.stats(approval.time.moving.avg.table$ApprovalTimeFromPIToDAC)$stats[c(1, 5)]
+
+approval.time.from.PI.to.DAC.plot <- ggplot(approval.time.moving.avg.table, aes(factor(ApprovedMonth), ApprovalTimeFromPIToDAC)) +
+  geom_boxplot() + 
+  coord_cartesian(ylim = ylim1*1.05) +
+  # scale_x_discrete(labels = format(as.Date(approval.time.moving.avg.table$ApprovedMonth), "%m/%Y")) +
+  scale_y_continuous(n.breaks = 8) +
+  stat_summary(fun=median, colour="cornflowerblue", aes(y=ApprovalTimeFromPIToDAC,group=1),
+               geom="line", group=1, size=2) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
+  xlab("Month") +
+  ylab("Time (Days)")
+  
+approval.time.from.PI.to.DAC.plot
+```
+
+```{r fig.cap="DAR Processing Time: From PI Submission to SO Approval", echo=FALSE, warning=FALSE ,message=FALSE}
+ylim2 <- boxplot.stats(approval.time.moving.avg.table$ApprovalTimeFromPIToSO)$stats[c(1, 5)]
+
+approval.time.from.PI.to.SO.plot <- ggplot(approval.time.moving.avg.table, aes(factor(ApprovedMonth), ApprovalTimeFromPIToSO)) +
+  geom_boxplot() + 
+  coord_cartesian(ylim = ylim2*1.05) +
+  scale_y_continuous(n.breaks = 8) +
+  stat_summary(fun=median, colour="cornflowerblue", aes(y=ApprovalTimeFromPIToSO,group=1),
+               geom="line", group=1, size=2) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
+  xlab("Month") +
+  ylab("Time (Days)")
+  
+approval.time.from.PI.to.SO.plot
+```
+
+```{r fig.cap="DAR Processing Time: From SO Approval to DAC Approval", echo=FALSE, warning=FALSE ,message=FALSE}
+ylim3 <- boxplot.stats(approval.time.moving.avg.table$ApprovalTimeFromSOToDAC)$stats[c(1, 5)]
+
+approval.time.from.SO.to.DAC.plot <- ggplot(approval.time.moving.avg.table, aes(factor(ApprovedMonth), ApprovalTimeFromSOToDAC)) +
+  geom_boxplot() + 
+  coord_cartesian(ylim = ylim3*1.05) +
+  scale_y_continuous(n.breaks = 8) +
+  stat_summary(fun=median, colour="cornflowerblue", aes(y=ApprovalTimeFromSOToDAC,group=1),
+               geom="line", group=1, size=2) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
+  xlab("Month") +
+  ylab("Time (Days)")
+  
+approval.time.from.SO.to.DAC.plot
+```
+
+```{r echo=FALSE, warning=FALSE ,message=FALSE}
+
+pi.submitted.to.current.dac.overall <- unique(nih_dac_action_table[nih_dac_action_table["DAC"] == dac,]$PI)
+nih_dac_action_table_current <- get.df.within.range(nih_dac_action_table,start.date,end.date,date.col="Submitted by PI")
+pi.submitted.to.current.dac.selected.time <- unique(nih_dac_action_table_current[nih_dac_action_table_current["DAC"] == dac,]$PI)
+  
+current.dac.pi.table <- subset(pi.requests.table.selected.time, PI %in% pi.submitted.to.current.dac.selected.time)
+current.dac.pi.submit.to.more.than.one.dac <-  sum(current.dac.pi.table$DAC > 1)
+current.dac.pi.average.dar <- round(mean(current.dac.pi.table$DAR),2)
+current.dac.pi.average.dac <- round(mean(current.dac.pi.table$DAC),2)
+current.dac.pi.average.project <- round(mean(current.dac.pi.table$Project),2)
+```
+
+Between `r start.date` and `r end.date`, `r length(pi.submitted.to.current.dac.selected.time)` PIs have submitted DAR to studies released by `r dac`. Among these PIs, `r current.dac.pi.submit.to.more.than.one.dac` have also submitted DAR to studies released by other DACs. PI who submitted DAR to `r dac` 
+on average submits `r current.dac.pi.average.dar` DAR for `r current.dac.pi.average.project` projects.
+
+# Study Released
+
+
+```{r include=FALSE}
+# study.summary.table.ordered <- study.summary.table[order(-study.summary.table$TotalRequest),]
+# total.approved.dar <- sum(study.summary.table.ordered$TotalApproved)
+# total.dar.downloaded <- sum(study.summary.table.ordered$TotalDownload)
+# download.percentage <- round(total.dar.downloaded*100/total.approved.dar,2)
+# phs.popular.all <- study.summary.table.ordered[1,]['StudyAccesion']
+# phs.popular.all.study.name <- study.summary.table.ordered[1,]['Study Name']
+# phs.popular.all.dac <- study.summary.table.ordered[1,]['DAC']
+# phs.popular.all.total.request <- study.summary.table.ordered[1,]['TotalRequest']
+
+dac.study.summary.table <- study.summary.table[study.summary.table['DAC'] == dac,]
+new.studies.released <- nrow(dac.study.summary.table)
+new.studies.dar <- sum(dac.study.summary.table$TotalRequest, na.rm = TRUE)
+dac.study.summary.table.ordered <- dac.study.summary.table[order(-dac.study.summary.table$TotalRequest),]
+phs.popular.this.dac <- dac.study.summary.table.ordered[1,]['StudyAccesion']
+phs.popular.this.dac.study.name <- dac.study.summary.table.ordered[1,]['Study Name']
+phs.popular.this.dac.total.request <- dac.study.summary.table.ordered[1,]['TotalRequest']
+```
+
+During this reporting period, `r new.studies.released` new studies were released and a total of `r new.studies.dar` DARs were made for these studies. Study `r phs.popular.this.dac` (`r phs.popular.this.dac.study.name`) has been the most requested dataset from the `r dac` DAC with `r phs.popular.this.dac.total.request` requests.
+
+```{r include=FALSE}
+study.released.fig.cap <- sprintf("Total Number of Study Released by %s", dac)
+```
+
+
+```{r fig.cap=study.released.fig.cap, echo=FALSE, warning=FALSE ,message=FALSE}
+study.released.growth.plot <- ggplot(study.status.table.dac, aes(x=Month,y=StudiesReleasedCummulative)) +
+  geom_line(size=2, color="cornflowerblue") +
+  xlab("Year") +
+  ylab("Studies Released")
+rect <- data.frame(xmin=as.Date(lubridate::floor_date(as.Date(params$start.date))), xmax=as.Date(lubridate::floor_date(as.Date(params$end.date))), ymin=0, ymax=Inf)
+study.released.growth.plot <- study.released.growth.plot + geom_rect(data=rect, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax),color="transparent", fill="orange", alpha=0.3, inherit.aes = FALSE)
+study.released.growth.plot
+```
+
+
+# Other Comparisons
+
+
+```{r include=FALSE}
+dual.y.fig.caption <- sprintf("Comparison of Requests Received and Studies Released by %s", dac)
+```
+
+
+```{r fig.cap=dual.y.fig.caption, echo=FALSE, warning=FALSE, message=FALSE}
+# A few constants
+coeff <- 100
+coeff <- max(study.status.table.dac$TotalRequestsCummulative)/max(study.status.table.dac$StudiesReleasedCummulative)
+
+comparison.plot <- ggplot(study.status.table.dac, aes(x=Month)) +
+  geom_line(aes(y=StudiesReleasedCummulative), size=2, color="coral3") +
+  geom_line(aes(y=TotalRequestsCummulative/coeff), size=2, color="cornflowerblue") +
+  scale_y_continuous(
+    # Features of the first axis
+    name = "Studies Released\n",
+    breaks = scales::pretty_breaks(n = 8),
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*coeff, name="Requests Received\n", breaks = scales::pretty_breaks(n = 8))
+  ) +
+  theme(
+    axis.title.y = element_text(color = "coral3", size=13),
+    axis.title.y.right = element_text(color = "cornflowerblue", size=13),
+    axis.ticks.y.left = element_line("coral3"),
+    axis.ticks.y.right = element_line("cornflowerblue"),
+    axis.text.y.left = element_text(color = "coral3", size=13),
+    axis.text.y.right = element_text(color = "cornflowerblue", size=13),
+  ) +
+  xlab("Year")
+
+rect3 <- data.frame(xmin=as.Date(lubridate::floor_date(as.Date(params$start.date))), xmax=as.Date(lubridate::floor_date(as.Date(params$end.date))), ymin=0, ymax=Inf)
+
+comparison.plot <- comparison.plot + geom_rect(data=rect3, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax),color="transparent", fill="orange", alpha=0.3, inherit.aes = FALSE)
+
+comparison.plot
+```
+
+```{r include=FALSE}
+growth.compare.caption <- sprintf("Comparison of DAR Growth and Studies Released Growth for %s",dac)
+```
+
+```{r fig.cap=growth.compare.caption, echo=FALSE, warning=FALSE, message=FALSE}
+study.status.table.dac.plot <- ggplot(study.status.table.dac, aes(x=Month)) +
+  geom_line(aes(y=TotalRequestsGrowth, colour="Total Requests Growth"), size=2) +
+  geom_line(aes(y=StudiesReleasedGrowth, colour="Studies Released Growth"), size=2) +
+  scale_color_manual("",
+                     values = c("Total Requests Growth"="cornflowerblue","Studies Released Growth"="coral3")) +
+  theme(legend.position = "bottom") +
+  scale_x_date(date_breaks = "6 month", date_labels = '%m/%Y') +
+  scale_y_continuous(n.breaks = 8, labels = function(x) paste0(x*100, "%")) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
+  xlab("Year") +
+  ylab("Growth (%)")
+  
+rect2 <- data.frame(xmin=as.Date(lubridate::floor_date(as.Date(params$start.date))), xmax=as.Date(lubridate::floor_date(as.Date(params$end.date))), ymin=0, ymax=Inf)
+
+study.status.table.dac.plot <- study.status.table.dac.plot + geom_rect(data=rect2, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax),color="transparent", fill="orange", alpha=0.3, inherit.aes = FALSE)
+study.status.table.dac.plot
+```
+
+
+
+---
+
+This report was prepared using the DACReportingTool package for R, build `r packageVersion("DACReportingTool")` by Mr. Hoyin Chu and Dr. Christopher Steven Marcum. 
