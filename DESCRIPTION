@@ -5,7 +5,7 @@ Version: 0.1.0
 Author: Hoyin Chu, Christopher Steven Marcum <chris.marcum@nih.gov>
 Maintainer: Hoyin Chu <hoyin.chu@nih.gov>
 Description: Provides functions to retrieve, analyze and visualize tables from NCBI's dbGaP Data Access Committee reporting tables.
-License: GPL-3
+License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1

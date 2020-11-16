@@ -16,7 +16,11 @@ A dataframe with 7 variables
 }
 }
 \usage{
-get.pi.table(start.date, end.date, action.table.df = nih_dac_action_table)
+get.pi.table(
+  start.date,
+  end.date,
+  action.table.df = DACReportingTool::nih_dac_action_table
+)
 }
 \arguments{
 \item{start.date}{String, date in 'yyyy-mm-dd' format. The start of the timeframe}

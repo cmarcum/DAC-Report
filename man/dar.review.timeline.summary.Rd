@@ -15,7 +15,11 @@ A data frame with 6 variables:
 }
 }
 \usage{
-dar.review.timeline.summary(start.date, end.date, df = nih_dac_action_table)
+dar.review.timeline.summary(
+  start.date,
+  end.date,
+  df = DACReportingTool::nih_dac_action_table
+)
 }
 \arguments{
 \item{start.date}{String, date in "yyyy-mm-dd" format}

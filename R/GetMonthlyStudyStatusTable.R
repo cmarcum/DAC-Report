@@ -36,7 +36,7 @@
 #' }
 #'
 #'
-get.monthly.study.status.table <- function(start.date,end.date,studies.df=all_nih_dac_studies_table,action.table.df=nih_dac_action_table) {
+get.monthly.study.status.table <- function(start.date,end.date,studies.df=DACReportingTool::all_nih_dac_studies_table,action.table.df=DACReportingTool::nih_dac_action_table) {
 
   # Aggregate of studies released by month
   temp_studies_table <- studies.df
@@ -61,8 +61,8 @@ get.monthly.study.status.table <- function(start.date,end.date,studies.df=all_ni
 
   big.df$StudiesReleasedCummulative <- cumsum(big.df[,"StudiesReleased"])
   big.df$TotalRequestsCummulative <- cumsum(big.df[,"TotalRequests"])
-  big.df$StudiesReleasedGrowth <- big.df$StudiesReleasedCummulative / lag(big.df$StudiesReleasedCummulative) - 1
-  big.df$TotalRequestsGrowth <- big.df$TotalRequestsCummulative / lag(big.df$TotalRequestsCummulative) - 1
+  big.df$StudiesReleasedGrowth <- big.df$StudiesReleasedCummulative / dplyr::lag(big.df$StudiesReleasedCummulative) - 1
+  big.df$TotalRequestsGrowth <- big.df$TotalRequestsCummulative / dplyr::lag(big.df$TotalRequestsCummulative) - 1
 
   return(big.df)
 }

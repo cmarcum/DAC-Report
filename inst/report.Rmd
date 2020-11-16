@@ -236,7 +236,7 @@ comparison.plot
 growth.compare.caption <- sprintf("Comparison of DAR Growth and Studies Released Growth for %s",dac)
 ```
 
-```{r fig.cap=growth.compare.caption, echo=FALSE, warning=FALSE ,message=FALSE, figures-side, fig.show="hold", out.width="50%"}
+```{r fig.cap=growth.compare.caption, echo=FALSE, warning=FALSE, message=FALSE}
 study.status.table.dac.plot <- ggplot(study.status.table.dac, aes(x=Month)) +
   geom_line(aes(y=TotalRequestsGrowth, colour="Total Requests Growth"), size=2) +
   geom_line(aes(y=StudiesReleasedGrowth, colour="Studies Released Growth"), size=2) +

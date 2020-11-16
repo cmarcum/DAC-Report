@@ -22,6 +22,8 @@
 #'
 #' @export
 compile.dac.report <- function(dac, author, start.date, end.date,...) {
+  all_nih_dac_studies_table <- DACReportingTool::all_nih_dac_studies_table
+  nih_dac_action_table <- DACReportingTool::nih_dac_action_table
   # Markdown template to use
   this.file<- system.file("report.Rmd", package = "DACReportingTool")
 

@@ -9,9 +9,9 @@ Diseases."
   update.msg <- "Run get.latest.approved.dar.date() to get the latest date in
 locally stored data.\nRun update.all.tables() to update to a more recent version
 if necessary."
-#   latest.update.date <- get.latest.approved.dar.date()
-#   update.msg <- sprintf("\nThe latest date in the locally stored data is : %s.
-# Run update.all.tables() to update to a more recent version if necessary.",latest.update.date)
+  latest.update.date <- get.latest.approved.dar.date()
+  update.msg <- sprintf("\nThe latest date in the locally stored data is : %s.
+Run update.all.tables() to update to a more recent version if necessary.",latest.update.date)
   packageStartupMessage(msg)
   packageStartupMessage(update.msg)
 }

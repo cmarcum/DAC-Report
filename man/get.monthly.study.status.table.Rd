@@ -17,8 +17,8 @@
 get.monthly.study.status.table(
   start.date,
   end.date,
-  studies.df = all_nih_dac_studies_table,
-  action.table.df = nih_dac_action_table
+  studies.df = DACReportingTool::all_nih_dac_studies_table,
+  action.table.df = DACReportingTool::nih_dac_action_table
 )
 }
 \arguments{

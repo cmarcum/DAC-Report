@@ -24,7 +24,7 @@ A data frame with 12 variables:
 get.study.summary.table(
   start.date = "2000-01-01",
   end.date = format(Sys.Date()),
-  df = nih_dac_action_table
+  df = DACReportingTool::nih_dac_action_table
 )
 }
 \arguments{

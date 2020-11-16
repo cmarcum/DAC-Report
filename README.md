@@ -6,6 +6,13 @@ This project is internal for a POC of automatic dbGaP reporting for Data Access 
 
 ![logo](icons/dac.png)
 
+# Downloading the package
+
+To download the package, use
+
+```
+install_github("https://github.com/cmarcum/DAC-Report/tree/devel") 
+```
 # Data Source
 We use the [dbGaP Data Access and Use Report page](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi) as our primary data source and this package serves as a programmatic interface to easily retrieve the data and automatically generate an DAC-specific data report. Currently the package stores all DAC action data (last update: 11/04/2020) locally [(example)](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?DAC=all&actType=all&stDate=04/23/2020&endDate=10/22/2020]). To load the data into R environment use:
 ```

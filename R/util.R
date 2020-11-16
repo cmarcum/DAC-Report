@@ -58,12 +58,24 @@ to.time <- function(col) {
 
 # Returns a list of currently supported dac names
 get.supported.dacs <- function() {
-  return(paste(shQuote(unique(nih_dac_action_table$DAC)), collapse=", "))
+  return(paste(shQuote(unique(DACReportingTool::nih_dac_action_table$DAC)), collapse=", "))
 }
 
-# Get the latest DAR approval date stored in nih_dac_action_table
+#' Get Latest Approved Table
+#'
+#' Get the latest DAR approval date stored in nih_dac_action_table
+#'
+#' @return Date object representing the latest approved DAR date
+#'
+#' @examples \dontrun{
+#' get.latest.approved.dar.date()
+#' > "2020-11-13"
+#' }
+#'
+#' @export
+#'
 get.latest.approved.dar.date <- function() {
-  converted.date <- as.POSIXct(nih_dac_action_table[,'Approved by DAC'], format="%m/%d/%Y %H:%M", tz="EST")
+  converted.date <- as.POSIXct(DACReportingTool::nih_dac_action_table[,'Approved by DAC'], format="%m/%d/%Y %H:%M", tz="EST")
   # Use the latest date in the approved by dac column as the last updated date
   cur.table.latest <- as.Date(max(converted.date ,na.rm = TRUE))
   return(cur.table.latest)
