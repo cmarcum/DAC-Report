@@ -18,7 +18,10 @@ Imports:
     rvest,
     xml2,
     rmarkdown,
-    lubridate
+    lubridate,
+    bookdown,
+    ggplot2,
+    tidyverse
 Depends: 
     R (>= 2.10)
 Roxygen: list(markdown = TRUE)
