@@ -7,6 +7,7 @@ params:
   start.date: "start.date"
   end.date: "end.date"
   dac: "DAC"
+  nih.dac.action.table: "nih_dac_action_table"
   timeline.summary.table: "timeline.summary.table"
   study.summary.table: "study.summary.table"
   study.status.table.all: "study.status.table.all"
@@ -27,7 +28,7 @@ date: `r format(Sys.time(), '%d %B, %Y')`
 library(ggplot2)
 library(tidyverse)
 dac <- params$dac
-
+nih_dac_action_table <- params$nih.dac.action.table
 dac.total.dars <- nrow(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,])
 total.number.of.projects <- length(unique(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,'Project']))
 

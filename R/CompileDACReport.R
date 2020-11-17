@@ -57,6 +57,7 @@ compile.dac.report <- function(dac, author, start.date, end.date,...) {
   end.date = end.date,
   author = author,
   dac=dac,
+  nih.dac.action.table=nih_dac_action_table,
   timeline.summary.table=timeline.summary.table,
   study.summary.table=study.summary.table,
   study.status.table.all=study.status.table.all,
