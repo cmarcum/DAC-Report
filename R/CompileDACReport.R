@@ -51,6 +51,8 @@ compile.dac.report <- function(dac, author, start.date, end.date,...) {
   print('Computing Monthly Approval Time Median Table...')
   approval.time.moving.avg.table <- get.approval.time.moving.average(start.date,end.date,dac.specific.action.table)
 
+  print('All tables calculated. Rendering...')
+
   rmarkdown::render(this.file, params = list(
   title = title,
   start.date = start.date,
