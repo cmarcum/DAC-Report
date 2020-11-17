@@ -189,7 +189,7 @@ study.released.growth.plot
 
 
 ```{r include=FALSE}
-dual.y.fig.caption <- sprintf("Comparison of Cummulatiev Requests Received and Studies Released by %s", dac)
+dual.y.fig.caption <- sprintf("Comparison of Cummulative Requests Received and Studies Released by %s", dac)
 ```
 
 
