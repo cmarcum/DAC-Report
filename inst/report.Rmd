@@ -38,8 +38,8 @@ num.dars.in.window <- dac.row[,'TotalRequests']
 number.of.accepted <- dac.row[,'TotalApproved']
 number.of.rejected <- dac.row[,'TotalRejected']
 
-avg.accept <- dac.row[,'AvgApprovalTime']
-avg.reject <- dac.row[,'AvgRejectionTime']
+avg.accept <- as.numeric(dac.row[,'AvgApprovalTime'],unit="days")
+avg.reject <- as.numeric(dac.row[,'AvgRejectionTime'],unit="days")
 
 dac.total.dars <- nrow(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,])
 dac.total.project <- length(unique(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,'Project']))
