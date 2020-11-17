@@ -49,7 +49,7 @@ The `r dac` Data Access Committee (DAC) currently manages `r dac.total.dars` dat
 Between `r params$start.date` and `r params$end.date` `r dac` reviewed `r num.dars.in.window` DARs. Of these, `r number.of.accepted` were accepted while `r number.of.rejected` were rejected.  The average amount of time from when the Principle Investigator (PI) submited a DAR to the final decision by the DAC was `r round(avg.final,1)` days.  The average time to an accepted decision was `r round(avg.accept,1)` days, while the average time to a rejected decision was `r round(avg.reject,1)` days.  Figure \@ref(fig:compline) is a barplot comparing the `r dac` DAC to time to final decision to the average across all NIH DACs during the same time interval.  
 
 ```{r compline, fig.cap="Comparison of DAR Processing Time among all DACs", echo=FALSE, warning=FALSE ,message=FALSE}
-timeline.summary.table <- timeline.summary.table %>% mutate(ToHighlight = ifelse( DAC == params$dac, "yes", "no" ))
+timeline.summary.table <- timeline.summary.table %>% dplyr::mutate(ToHighlight = ifelse( DAC == params$dac, "yes", "no" ))
 timeline.summary.table$AvgApprovalTime <- as.numeric(timeline.summary.table$AvgApprovalTime)
 timeline.summary.table<- timeline.summary.table[order(timeline.summary.table$AvgApprovalTime, decreasing=TRUE),]
 timeline.summary.table$DAC <- factor(timeline.summary.table$DAC, levels=unique(as.character(timeline.summary.table$DAC)))
