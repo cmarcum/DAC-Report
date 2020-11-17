@@ -26,24 +26,19 @@ date: `r format(Sys.time(), '%d %B, %Y')`
 ```{r, include=FALSE}
 # Loads variables to be reported
 library(ggplot2)
-library(tidyverse)
 dac <- params$dac
 nih_dac_action_table <- params$nih.dac.action.table
 dac.total.dars <- nrow(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,])
-total.number.of.projects <- length(unique(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,'Project']))
 
+total.number.of.projects <- length(unique(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,'Project']))
 dac.row <- timeline.summary.table[timeline.summary.table['DAC'] == dac,]
 
 num.dars.in.window <- dac.row[,'TotalRequests']
 number.of.accepted <- dac.row[,'TotalApproved']
 number.of.rejected <- dac.row[,'TotalRejected']
 
-avg.accept <- as.numeric(dac.row[,'AvgApprovalTime'],unit="days")
-avg.reject <- as.numeric(dac.row[,'AvgRejectionTime'],unit="days")
-
-dac.total.dars <- nrow(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,])
-dac.total.project <- length(unique(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,'Project']))
-
+avg.accept <- as.numeric(dac.row[,'AvgApprovalTime'])
+avg.reject <- as.numeric(dac.row[,'AvgRejectionTime'])
 avg.final <- (avg.accept*number.of.accepted + avg.reject*number.of.rejected) / (number.of.accepted+number.of.rejected)
 ```
 
@@ -55,7 +50,7 @@ Between `r params$start.date` and `r params$end.date` `r dac` reviewed `r num.da
 
 ```{r compline, fig.cap="Comparison of DAR Processing Time among all DACs", echo=FALSE, warning=FALSE ,message=FALSE}
 timeline.summary.table <- timeline.summary.table %>% mutate(ToHighlight = ifelse( DAC == params$dac, "yes", "no" ))
-timeline.summary.table$AvgApprovalTime <- as.numeric(timeline.summary.table$AvgApprovalTime, units="days")
+timeline.summary.table$AvgApprovalTime <- as.numeric(timeline.summary.table$AvgApprovalTime)
 timeline.summary.table<- timeline.summary.table[order(timeline.summary.table$AvgApprovalTime, decreasing=TRUE),]
 timeline.summary.table$DAC <- factor(timeline.summary.table$DAC, levels=unique(as.character(timeline.summary.table$DAC)))
 p <- ggplot(data=timeline.summary.table, aes(x=DAC, y=AvgApprovalTime, fill = ToHighlight)) +
