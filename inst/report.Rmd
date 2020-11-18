@@ -26,6 +26,12 @@ date: `r format(Sys.time(), '%d %B, %Y')`
 ```{r, include=FALSE}
 # Loads variables to be reported
 library(ggplot2)
+
+# util function
+get.df.within.range <- function(df,start.date,end.date,date.col="Approved by DAC") {
+  return(subset(df, as.Date(df[,date.col], format="%m/%d/%Y") >= start.date & as.Date(df[,date.col], format="%m/%d/%Y") <= end.date))
+}
+
 dac <- params$dac
 nih_dac_action_table <- params$nih.dac.action.table
 dac.total.dars <- nrow(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,])
@@ -159,7 +165,9 @@ on average submits `r current.dac.pi.average.dar` DAR for `r current.dac.pi.aver
 # phs.popular.all.total.request <- study.summary.table.ordered[1,]['TotalRequest']
 
 dac.study.summary.table <- study.summary.table[study.summary.table['DAC'] == dac,]
+dac.study.summary.table <- get.df.within.range(dac.study.summary.table,params$start.date,params$end.date,"Study Release Date")
 new.studies.released <- nrow(dac.study.summary.table)
+
 new.studies.dar <- sum(dac.study.summary.table$TotalRequest, na.rm = TRUE)
 dac.study.summary.table.ordered <- dac.study.summary.table[order(-dac.study.summary.table$TotalRequest),]
 phs.popular.this.dac <- dac.study.summary.table.ordered[1,]['StudyAccesion']
