@@ -7,6 +7,7 @@ params:
   start.date: "start.date"
   end.date: "end.date"
   dac: "DAC"
+  nih.dac.action.table: "nih_dac_action_table"
   timeline.summary.table: "timeline.summary.table"
   study.summary.table: "study.summary.table"
   study.status.table.all: "study.status.table.all"
@@ -25,27 +26,19 @@ date: `r format(Sys.time(), '%d %B, %Y')`
 ```{r, include=FALSE}
 # Loads variables to be reported
 library(ggplot2)
-library(tidyverse)
-library(gridExtra)
-library(latticeExtra)
-library(hrbrthemes)
 dac <- params$dac
-
+nih_dac_action_table <- params$nih.dac.action.table
 dac.total.dars <- nrow(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,])
-total.number.of.projects <- length(unique(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,'Project']))
 
+total.number.of.projects <- length(unique(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,'Project']))
 dac.row <- timeline.summary.table[timeline.summary.table['DAC'] == dac,]
 
 num.dars.in.window <- dac.row[,'TotalRequests']
 number.of.accepted <- dac.row[,'TotalApproved']
 number.of.rejected <- dac.row[,'TotalRejected']
 
-avg.accept <- dac.row[,'AvgApprovalTime']
-avg.reject <- dac.row[,'AvgRejectionTime']
-
-dac.total.dars <- nrow(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,])
-dac.total.project <- length(unique(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,'Project']))
-
+avg.accept <- as.numeric(dac.row[,'AvgApprovalTime'])
+avg.reject <- as.numeric(dac.row[,'AvgRejectionTime'])
 avg.final <- (avg.accept*number.of.accepted + avg.reject*number.of.rejected) / (number.of.accepted+number.of.rejected)
 ```
 
@@ -55,9 +48,9 @@ The `r dac` Data Access Committee (DAC) currently manages `r dac.total.dars` dat
 
 Between `r params$start.date` and `r params$end.date` `r dac` reviewed `r num.dars.in.window` DARs. Of these, `r number.of.accepted` were accepted while `r number.of.rejected` were rejected.  The average amount of time from when the Principle Investigator (PI) submited a DAR to the final decision by the DAC was `r round(avg.final,1)` days.  The average time to an accepted decision was `r round(avg.accept,1)` days, while the average time to a rejected decision was `r round(avg.reject,1)` days.  Figure \@ref(fig:compline) is a barplot comparing the `r dac` DAC to time to final decision to the average across all NIH DACs during the same time interval.  
 
-```{r compline, fig.cap="Comparison of Time to Final Decision", echo=FALSE, warning=FALSE ,message=FALSE}
-timeline.summary.table <- timeline.summary.table %>% mutate(ToHighlight = ifelse( DAC == params$dac, "yes", "no" ))
-timeline.summary.table$AvgApprovalTime <- as.numeric(timeline.summary.table$AvgApprovalTime, units="days")
+```{r compline, fig.cap="Comparison of DAR Processing Time among all DACs", echo=FALSE, warning=FALSE ,message=FALSE}
+timeline.summary.table <- timeline.summary.table %>% dplyr::mutate(ToHighlight = ifelse( DAC == params$dac, "yes", "no" ))
+timeline.summary.table$AvgApprovalTime <- as.numeric(timeline.summary.table$AvgApprovalTime)
 timeline.summary.table<- timeline.summary.table[order(timeline.summary.table$AvgApprovalTime, decreasing=TRUE),]
 timeline.summary.table$DAC <- factor(timeline.summary.table$DAC, levels=unique(as.character(timeline.summary.table$DAC)))
 p <- ggplot(data=timeline.summary.table, aes(x=DAC, y=AvgApprovalTime, fill = ToHighlight)) +
@@ -66,17 +59,17 @@ p <- ggplot(data=timeline.summary.table, aes(x=DAC, y=AvgApprovalTime, fill = To
   scale_y_continuous(breaks = seq(0, max(timeline.summary.table$AvgApprovalTime, na.rm = TRUE), by = 7)) +
   scale_fill_manual(values = c("yes"="cornflowerblue","no"="gray"), guide = FALSE) +
   coord_flip() +
-  ylab("Average Approval Time (days)")
+  ylab("Average Processing Time (days)")
 p
 ```
 
 ```{r include=FALSE}
-dar.access.fig.cap <- sprintf("Total Data Access Requests Submitted to %s", dac)
+dar.access.fig.cap <- sprintf("Data Access Requests Submitted to %s Per Month Since 2015", dac)
 ```
 
 
 ```{r fig.cap=dar.access.fig.cap, echo=FALSE, warning=FALSE ,message=FALSE}
-dar.request.growth.plot <- ggplot(study.status.table.dac, aes(x=Month,y=TotalRequestsCummulative)) +
+dar.request.growth.plot <- ggplot(study.status.table.dac, aes(x=Month,y=TotalRequests)) +
   geom_line(size=2, color="cornflowerblue") +
   xlab("Year") +
   ylab("DAR Total")
@@ -177,12 +170,12 @@ phs.popular.this.dac.total.request <- dac.study.summary.table.ordered[1,]['Total
 During this reporting period, `r new.studies.released` new studies were released and a total of `r new.studies.dar` DARs were made for these studies. Study `r phs.popular.this.dac` (`r phs.popular.this.dac.study.name`) has been the most requested dataset from the `r dac` DAC with `r phs.popular.this.dac.total.request` requests.
 
 ```{r include=FALSE}
-study.released.fig.cap <- sprintf("Total Number of Study Released by %s", dac)
+study.released.fig.cap <- sprintf("Number of Study Released by %s Per Month Since 2015", dac)
 ```
 
 
 ```{r fig.cap=study.released.fig.cap, echo=FALSE, warning=FALSE ,message=FALSE}
-study.released.growth.plot <- ggplot(study.status.table.dac, aes(x=Month,y=StudiesReleasedCummulative)) +
+study.released.growth.plot <- ggplot(study.status.table.dac, aes(x=Month,y=StudiesReleased)) +
   geom_line(size=2, color="cornflowerblue") +
   xlab("Year") +
   ylab("Studies Released")
@@ -196,7 +189,7 @@ study.released.growth.plot
 
 
 ```{r include=FALSE}
-dual.y.fig.caption <- sprintf("Comparison of Requests Received and Studies Released by %s", dac)
+dual.y.fig.caption <- sprintf("Comparison of Cummulative Requests Received and Studies Released by %s", dac)
 ```
 
 

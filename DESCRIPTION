@@ -14,11 +14,12 @@ Imports:
     magrittr,
     data.table,
     dplyr,
-    htmltab,
     rvest,
     xml2,
     rmarkdown,
-    lubridate
+    lubridate,
+    bookdown,
+    ggplot2,
 Depends: 
     R (>= 2.10)
 Roxygen: list(markdown = TRUE)
