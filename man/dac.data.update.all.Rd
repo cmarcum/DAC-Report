@@ -2,7 +2,7 @@
 % Please edit documentation in R/UpdateEveryTable.R
 \name{dac.data.update.all}
 \alias{dac.data.update.all}
-\title{Updates Every Table inside the package}
+\title{Update all DAC data}
 \usage{
 dac.data.update.all()
 }
@@ -12,7 +12,7 @@ the nih_dac_actions_table and the all_nih_dac_studies_table
 }
 \examples{
 \dontrun{
-all.dac.tables.update()
+dac.data.update.all()
 }
 
 }
