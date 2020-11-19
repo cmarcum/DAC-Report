@@ -18,7 +18,7 @@ A data frame with 6 variables:
 dar.review.timeline.summary(
   start.date,
   end.date,
-  df = DACReportingTool::nih_dac_action_table
+  df = get.nih.dac.action.table()
 )
 }
 \arguments{

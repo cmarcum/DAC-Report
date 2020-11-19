@@ -37,7 +37,7 @@
 #'
 #'
 #'
-get.pi.table <- function(start.date,end.date,action.table.df=DACReportingTool::nih_dac_action_table) {
+get.pi.table <- function(start.date,end.date,action.table.df=get.nih.dac.action.table()) {
   action.table.df <- get.df.within.range(action.table.df,start.date,end.date,date.col="Submitted by PI")
   pi.dar.submitted.table <- stats::aggregate(action.table.df[c("DAR","DAC","Project")], by=list(PI=action.table.df$PI), FUN=function(x){length(unique(x))})
   pi.approval.table <- stats::aggregate(action.table.df[c('Approved by DAC', 'Rejected by DAC')], by=list(PI=action.table.df$PI), FUN=function(x){sum(x != "")})

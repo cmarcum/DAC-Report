@@ -1,6 +1,6 @@
-#' The NIH DAC Action Table
+#' Returns the locally stored DAC action table
 #'
-#' This table contains all DAR (Data Access Requests) that are approved within a period of time
+#' @return The locally stored DAC action table
 #'
 #' @format A data frame with 11 variables:
 #' \describe{
@@ -17,4 +17,19 @@
 #'   \item{Data downloaded}{Whether the data requested is downloaded}
 #' }
 #' @source \url{https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?DAC=all&actType=all&stDate=10/13/2020&endDate=10/23/2020}
-"nih_dac_action_table"
+#'
+#' @examples \dontrun{
+#' > get.nih.dac.action.table()
+#'      DAC    PI Project       DAR  Study accesion  Submitted by PI   ... Data downloaded
+#' 2    CDAC   563     501  65316.v4 phs000688.v1.p1 09/07/2020 07:22  ... no
+#' 3    CDAC   563   11888  74027.v3 phs000688.v1.p1 09/09/2020 09:31  ... no
+#' 4    CDAC  1280     849  73340.v3 phs000688.v1.p1 08/28/2020 11:46  ... yes in previous version
+#' 5    CDAC  2418    1395  85271.v3 phs000688.v1.p1 09/02/2020 14:55  ... no
+#' 6    CDAC  3464    1955  48719.v9 phs000688.v1.p1 09/21/2020 15:05  ... no
+#' ......
+#' }
+#'
+get.nih.dac.action.table <- function() {
+  load(system.file("nih_dac_action_table.rda", package = "DACReportingTool"))
+  return(nih_dac_action_table)
+}

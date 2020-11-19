@@ -1,9 +1,9 @@
 # Given phs.id, returns dataframe containingi information about request access and PI
-get.phs.study.info <- function(phs.id) {
-  study.key <- get.study.key(phs.id)
+request.phs.study.info <- function(phs.id) {
+  study.key <- request.study.key(phs.id)
   if(!is.na(study.key)) {
-    restricted.access.table <- get.phs.restricted.access.table(phs.id,study.key)
-    principle.investigators.str <- paste(get.phs.study.attribution(phs.id)$PI, collapse = ";")
+    restricted.access.table <- request.phs.restricted.access.table(phs.id,study.key)
+    principle.investigators.str <- paste(request.phs.study.attribution(phs.id)$PI, collapse = ";")
     if (principle.investigators.str == "NA") {
       restricted.access.table$PI <- NA
     } else {
@@ -16,7 +16,7 @@ get.phs.study.info <- function(phs.id) {
 }
 
 # Gets the internal study key for the given phs id
-get.study.key <- function(phs.id) {
+request.study.key <- function(phs.id) {
   #print("Finding study key...")
   base.url <- "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/collection.cgi?study_id=%s"
   # TODO error handling
@@ -39,9 +39,9 @@ get.study.key <- function(phs.id) {
 }
 
 # Retrieves the number of publications associated to the given phs id
-get.phs.publications <- function(phs.id) {
+request.phs.publications <- function(phs.id) {
   base.url <- "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/GetReference.cgi?study_id=%s&study_key=%s&page_number=1"
-  study.key <- get.study.key(phs.id)
+  study.key <- request.study.key(phs.id)
   request.url <- sprintf(base.url,phs.id,study.key)
   webpage <- xml2::read_html(request.url)
   webpage.as.list <- xml2::as_list(webpage)
@@ -59,7 +59,7 @@ get.phs.publications <- function(phs.id) {
 
 # Returns a table with column Consent group, Is IRB required, DAC, Numebr of participants
 # of the given phs id and study key
-get.phs.restricted.access.table <- function(phs.id,study.key) {
+request.phs.restricted.access.table <- function(phs.id,study.key) {
   #print("Finding restricted access table")
   base.url <- "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/GetRestrictedAccess.cgi?study_id=%s&study_key=%s"
   request.url <- sprintf(base.url,phs.id,study.key)
@@ -77,7 +77,7 @@ get.phs.restricted.access.table <- function(phs.id,study.key) {
 }
 
 # Given phs id, returns a dataframe with the names of the PI responsible for the study
-get.phs.study.attribution <- function(phs.id) {
+request.phs.study.attribution <- function(phs.id) {
   base.url <- "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/GetStudyAttribution.cgi?study_id=%s"
   request.url  <- sprintf(base.url,phs.id)
   webpage <- xml2::read_html(request.url)
@@ -92,11 +92,11 @@ get.phs.study.attribution <- function(phs.id) {
 }
 
 # Given a list of phs id, send request to get their information and combine into one dataframe
-get.phs.studies.table <- function(phs.id.list,wait.for=2) {
+request.phs.studies.table <- function(phs.id.list,wait.for=2) {
   df.list <- list()
   for (i in 1:length(phs.id.list)) {
     print(sprintf("Currently retrieing study %s : %s",i,phs.id.list[[i]]))
-    cur.table <- get.phs.study.info(phs.id.list[[i]])
+    cur.table <- request.phs.study.info(phs.id.list[[i]])
     df.list[[i]] <- cur.table
     Sys.sleep(wait.for)
   }
@@ -108,8 +108,8 @@ get.phs.studies.table <- function(phs.id.list,wait.for=2) {
 # Retrieve phs studies that are present in nih_dac_action_table but not phs_studies_table and updates the table
 update.phs.studies.table <- function(overwrite=TRUE,return.table=FALSE,wait.for=2) {
   print("Updating phs studies table...")
-  load(system.file("data", "phs_studies_table.rda", package = "DACReportingTool"))
-  load(system.file("data", "nih_dac_action_table.rda", package = "DACReportingTool"))
+  load(system.file("phs_studies_table.rda", package = "DACReportingTool"))
+  load(system.file("nih_dac_action_table.rda", package = "DACReportingTool"))
 
   all.existing.ids <- unique(phs_studies_table$phs_id)
   all.ids.in.action.table <- unique(nih_dac_action_table$`Study accesion`)
@@ -120,13 +120,13 @@ update.phs.studies.table <- function(overwrite=TRUE,return.table=FALSE,wait.for=
   }
   print(sprintf("Retrieving %s new phs ids. Estimated wait time: %s seconds", length(ids.to.retrieve), (wait.for+1)*length(ids.to.retrieve)))
 
-  new.table <- get.phs.studies.table(ids.to.retrieve)
+  new.table <- request.phs.studies.table(ids.to.retrieve)
 
   big.df <- data.table::rbindlist(list(phs_studies_table,new.table),fill=TRUE)
   print("phs studies table update completed")
   if (overwrite) {
     phs_studies_table <- big.df
-    save(phs_studies_table,file = system.file("data", "phs_studies_table.rda", package = "DACReportingTool"), compress = "xz")
+    save(phs_studies_table,file = system.file("phs_studies_table.rda", package = "DACReportingTool"), compress = "xz")
   }
   if (return.table) {
     return(big.df)

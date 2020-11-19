@@ -7,7 +7,7 @@
 #' @return Dataframe containing all DAC actions performed within the specified time range
 #'
 #' @examples \dontrun{
-#' > get.all.dac.action.table('09/01/2020','10/01/2020')
+#' > request.all.dac.action.table('09/01/2020','10/01/2020')
 #'      DAC    PI Project       DAR  Study accesion  Submitted by PI   ... Data downloaded
 #' 2    CDAC   563     501  65316.v4 phs000688.v1.p1 09/07/2020 07:22  ... no
 #' 3    CDAC   563   11888  74027.v3 phs000688.v1.p1 09/09/2020 09:31  ... no
@@ -18,7 +18,7 @@
 #' }
 #'
 #' @export
-get.all.dac.action.table <- function(start.date,end.date) {
+request.all.dac.action.table <- function(start.date,end.date) {
   table.url <- "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?DAC=all&actType=all&stDate=%s&endDate=%s"
   table.xpath <- "//tr"
   request.url <- sprintf(table.url,utils::URLencode(start.date,reserved = TRUE), utils::URLencode(end.date,reserved = TRUE))
@@ -43,11 +43,11 @@ get.all.dac.action.table <- function(start.date,end.date) {
 #' @export
 dac.action.table.update <- function(update.to=format(Sys.Date(),"%m/%d/%Y"),overwrite=TRUE,return.table=FALSE) {
   print("Updating DAC Action Table...")
-  load(system.file("data", "nih_dac_action_table.rda", package = "DACReportingTool"))
+  load(system.file("nih_dac_action_table.rda", package = "DACReportingTool"))
   update.to <- as.Date(update.to,"%m/%d/%Y")
   cur.table.latest <- get.latest.approved.dar.date()
   # Get table starting from latest date, append to current table
-  new.table <- get.all.dac.action.table(format(cur.table.latest,"%m/%d/%Y"),format(update.to,"%m/%d/%Y"))
+  new.table <- request.all.dac.action.table(format(cur.table.latest,"%m/%d/%Y"),format(update.to,"%m/%d/%Y"))
   combined.table <- dplyr::bind_rows(nih_dac_action_table,new.table)
 
   # Drop rows with same DAR id (only keep the latest one)
@@ -56,7 +56,7 @@ dac.action.table.update <- function(update.to=format(Sys.Date(),"%m/%d/%Y"),over
   print("DAC Action Table update completed")
 
   if (overwrite) {
-    save(nih_dac_action_table,file = system.file("data", "nih_dac_action_table.rda", package = "DACReportingTool"), compress = "xz")
+    save(nih_dac_action_table,file = system.file("nih_dac_action_table.rda", package = "DACReportingTool"), compress = "xz")
   }
   if (return.table) {
     return(nih_dac_action_table)
@@ -64,7 +64,7 @@ dac.action.table.update <- function(update.to=format(Sys.Date(),"%m/%d/%Y"),over
 }
 
 # Retrieves table a1 (table is time invariant)
-get.all.nih.dac.studies.table <- function(start.date="01/01/2000",end.date=format(Sys.Date(),"%m/%d/%Y")) {
+request.all.nih.dac.studies.table <- function(start.date="01/01/2000",end.date=format(Sys.Date(),"%m/%d/%Y")) {
   table.url <- "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?stDate=%s&endDate=%s&retTable=tablea1"
   table.xpath <- "//tr"
   request.url <- sprintf(table.url,utils::URLencode(start.date,reserved = TRUE), utils::URLencode(end.date,reserved = TRUE))

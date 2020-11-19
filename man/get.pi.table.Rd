@@ -19,7 +19,7 @@ A dataframe with 7 variables
 get.pi.table(
   start.date,
   end.date,
-  action.table.df = DACReportingTool::nih_dac_action_table
+  action.table.df = get.nih.dac.action.table()
 )
 }
 \arguments{
