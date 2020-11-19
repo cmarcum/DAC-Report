@@ -26,6 +26,12 @@ date: `r format(Sys.time(), '%d %B, %Y')`
 ```{r, include=FALSE}
 # Loads variables to be reported
 library(ggplot2)
+
+# util function
+get.df.within.range <- function(df,start.date,end.date,date.col="Approved by DAC") {
+  return(subset(df, as.Date(df[,date.col], format="%m/%d/%Y") >= start.date & as.Date(df[,date.col], format="%m/%d/%Y") <= end.date))
+}
+
 dac <- params$dac
 nih_dac_action_table <- params$nih.dac.action.table
 dac.total.dars <- nrow(nih_dac_action_table[nih_dac_action_table['DAC'] == dac,])
@@ -80,29 +86,12 @@ dar.request.growth.plot
 ```
 
 
-```{r fig.cap="DAR Processing Time: From PI Submission to DAC Approval", echo=FALSE, warning=FALSE ,message=FALSE}
-ylim1 <- boxplot.stats(approval.time.moving.avg.table$ApprovalTimeFromPIToDAC)$stats[c(1, 5)]
-
-approval.time.from.PI.to.DAC.plot <- ggplot(approval.time.moving.avg.table, aes(factor(ApprovedMonth), ApprovalTimeFromPIToDAC)) +
-  geom_boxplot() + 
-  coord_cartesian(ylim = ylim1*1.05) +
-  # scale_x_discrete(labels = format(as.Date(approval.time.moving.avg.table$ApprovedMonth), "%m/%Y")) +
-  scale_y_continuous(n.breaks = 8) +
-  stat_summary(fun=median, colour="cornflowerblue", aes(y=ApprovalTimeFromPIToDAC,group=1),
-               geom="line", group=1, size=2) +
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
-  xlab("Month") +
-  ylab("Time (Days)")
-  
-approval.time.from.PI.to.DAC.plot
-```
-
 ```{r fig.cap="DAR Processing Time: From PI Submission to SO Approval", echo=FALSE, warning=FALSE ,message=FALSE}
-ylim2 <- boxplot.stats(approval.time.moving.avg.table$ApprovalTimeFromPIToSO)$stats[c(1, 5)]
+ylim1 <- boxplot.stats(approval.time.moving.avg.table$ApprovalTimeFromPIToSO)$stats[c(1, 5)]
 
 approval.time.from.PI.to.SO.plot <- ggplot(approval.time.moving.avg.table, aes(factor(ApprovedMonth), ApprovalTimeFromPIToSO)) +
   geom_boxplot() + 
-  coord_cartesian(ylim = ylim2*1.05) +
+  coord_cartesian(ylim = ylim1*1.5) +
   scale_y_continuous(n.breaks = 8) +
   stat_summary(fun=median, colour="cornflowerblue", aes(y=ApprovalTimeFromPIToSO,group=1),
                geom="line", group=1, size=2) +
@@ -114,11 +103,11 @@ approval.time.from.PI.to.SO.plot
 ```
 
 ```{r fig.cap="DAR Processing Time: From SO Approval to DAC Approval", echo=FALSE, warning=FALSE ,message=FALSE}
-ylim3 <- boxplot.stats(approval.time.moving.avg.table$ApprovalTimeFromSOToDAC)$stats[c(1, 5)]
+ylim2 <- boxplot.stats(approval.time.moving.avg.table$ApprovalTimeFromSOToDAC)$stats[c(1, 5)]
 
 approval.time.from.SO.to.DAC.plot <- ggplot(approval.time.moving.avg.table, aes(factor(ApprovedMonth), ApprovalTimeFromSOToDAC)) +
   geom_boxplot() + 
-  coord_cartesian(ylim = ylim3*1.05) +
+  coord_cartesian(ylim = ylim2*1.5) +
   scale_y_continuous(n.breaks = 8) +
   stat_summary(fun=median, colour="cornflowerblue", aes(y=ApprovalTimeFromSOToDAC,group=1),
                geom="line", group=1, size=2) +
@@ -129,13 +118,34 @@ approval.time.from.SO.to.DAC.plot <- ggplot(approval.time.moving.avg.table, aes(
 approval.time.from.SO.to.DAC.plot
 ```
 
+```{r fig.cap="DAR Processing Time: From PI Submission to DAC Approval", echo=FALSE, warning=FALSE ,message=FALSE}
+ylim3 <- boxplot.stats(approval.time.moving.avg.table$ApprovalTimeFromPIToDAC)$stats[c(1, 5)]
+
+approval.time.from.PI.to.DAC.plot <- ggplot(approval.time.moving.avg.table, aes(factor(ApprovedMonth), ApprovalTimeFromPIToDAC)) +
+  geom_boxplot() + 
+  coord_cartesian(ylim = ylim3*1.5) +
+  # scale_x_discrete(labels = format(as.Date(approval.time.moving.avg.table$ApprovedMonth), "%m/%Y")) +
+  scale_y_continuous(n.breaks = 8) +
+  stat_summary(fun=median, colour="cornflowerblue", aes(y=ApprovalTimeFromPIToDAC,group=1),
+               geom="line", group=1, size=2) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
+  xlab("Month") +
+  ylab("Time (Days)")
+  
+approval.time.from.PI.to.DAC.plot
+```
+
 ```{r echo=FALSE, warning=FALSE ,message=FALSE}
 
-pi.submitted.to.current.dac.overall <- unique(nih_dac_action_table[nih_dac_action_table["DAC"] == dac,]$PI)
 nih_dac_action_table_current <- get.df.within.range(nih_dac_action_table,start.date,end.date,date.col="Submitted by PI")
+#print(nih_dac_action_table_current)
+
 pi.submitted.to.current.dac.selected.time <- unique(nih_dac_action_table_current[nih_dac_action_table_current["DAC"] == dac,]$PI)
-  
+#print(pi.submitted.to.current.dac.selected.time)
+
 current.dac.pi.table <- subset(pi.requests.table.selected.time, PI %in% pi.submitted.to.current.dac.selected.time)
+#print(current.dac.pi.table)
+
 current.dac.pi.submit.to.more.than.one.dac <-  sum(current.dac.pi.table$DAC > 1)
 current.dac.pi.average.dar <- round(mean(current.dac.pi.table$DAR),2)
 current.dac.pi.average.dac <- round(mean(current.dac.pi.table$DAC),2)
@@ -143,7 +153,7 @@ current.dac.pi.average.project <- round(mean(current.dac.pi.table$Project),2)
 ```
 
 Between `r start.date` and `r end.date`, `r length(pi.submitted.to.current.dac.selected.time)` PIs have submitted DAR to studies released by `r dac`. Among these PIs, `r current.dac.pi.submit.to.more.than.one.dac` have also submitted DAR to studies released by other DACs. PI who submitted DAR to `r dac` 
-on average submits `r current.dac.pi.average.dar` DAR for `r current.dac.pi.average.project` projects.
+on average submits `r current.dac.pi.average.dar` DAR to all DACs for `r current.dac.pi.average.project` projects.
 
 # Study Released
 
@@ -159,7 +169,9 @@ on average submits `r current.dac.pi.average.dar` DAR for `r current.dac.pi.aver
 # phs.popular.all.total.request <- study.summary.table.ordered[1,]['TotalRequest']
 
 dac.study.summary.table <- study.summary.table[study.summary.table['DAC'] == dac,]
+dac.study.summary.table <- get.df.within.range(dac.study.summary.table,params$start.date,params$end.date,"Study Release Date")
 new.studies.released <- nrow(dac.study.summary.table)
+
 new.studies.dar <- sum(dac.study.summary.table$TotalRequest, na.rm = TRUE)
 dac.study.summary.table.ordered <- dac.study.summary.table[order(-dac.study.summary.table$TotalRequest),]
 phs.popular.this.dac <- dac.study.summary.table.ordered[1,]['StudyAccesion']
@@ -167,7 +179,7 @@ phs.popular.this.dac.study.name <- dac.study.summary.table.ordered[1,]['Study Na
 phs.popular.this.dac.total.request <- dac.study.summary.table.ordered[1,]['TotalRequest']
 ```
 
-During this reporting period, `r new.studies.released` new studies were released and a total of `r new.studies.dar` DARs were made for these studies. Study `r phs.popular.this.dac` (`r phs.popular.this.dac.study.name`) has been the most requested dataset from the `r dac` DAC with `r phs.popular.this.dac.total.request` requests.
+During this reporting period, `r new.studies.released` new studies were released by `r dac` and a total of `r new.studies.dar` DARs were made for these studies. Study `r phs.popular.this.dac` (`r phs.popular.this.dac.study.name`) has been the most requested dataset from the `r dac` DAC with `r phs.popular.this.dac.total.request` requests.
 
 ```{r include=FALSE}
 study.released.fig.cap <- sprintf("Number of Study Released by %s Per Month Since 2015", dac)

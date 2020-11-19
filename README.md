@@ -21,7 +21,7 @@ data("nih_dac_action_table")
 ```
 And to update all locally stored data with the latest information from dbGaP, use:
 ```
-update.every.table()
+dac.data.update.all()
 ```
 
 # Tables Available

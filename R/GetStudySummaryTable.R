@@ -1,6 +1,6 @@
 #' Get Study Summary Table
 #'
-#' Returns a summary dataframe of all studies made in the given timeframe. Note that some studies
+#' Returns a summary dataframe of all studies that received requests in the given timeframe. Note that some studies
 #' can be both approved and rejected (ex. approved but later rejected ), or neither (still in process of approval)
 #'
 #' @param start.date String, date in "yyyy-mm-dd" format

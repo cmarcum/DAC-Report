@@ -1,4 +1,4 @@
-#' Update Every Table
+#' Update all DAC data
 #'
 #' Updates every table that are locally stored in the package. Including
 #' the nih_dac_actions_table and the all_nih_dac_studies_table
@@ -7,10 +7,10 @@
 #' @export
 #'
 #' @examples \dontrun{
-#' update.every.table
+#' dac.data.update.all()
 #' }
 #'
-update.every.table <- function() {
+dac.data.update.all <- function() {
   dac.action.table.update()
   update.phs.studies.table()
   all_nih_dac_studies_table <- get.all.nih.dac.studies.table()
