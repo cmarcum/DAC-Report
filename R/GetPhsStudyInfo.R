@@ -115,9 +115,6 @@ update.phs.studies.table <- function(overwrite=TRUE,return.table=FALSE,wait.for=
   all.ids.in.action.table <- unique(nih_dac_action_table$`Study accesion`)
 
   ids.to.retrieve <- setdiff(all.ids.in.action.table,all.existing.ids)
-  if (length(ids.to.retrieve) == 0) {
-    stop("No studies to update")
-  }
   print(sprintf("Retrieving %s new phs ids. Estimated wait time: %s seconds", length(ids.to.retrieve), (wait.for+1)*length(ids.to.retrieve)))
 
   new.table <- request.phs.studies.table(ids.to.retrieve)
