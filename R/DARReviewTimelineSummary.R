@@ -40,7 +40,7 @@
 #' }
 #'
 #' @export
-dar.review.timeline.summary <- function(start.date,end.date,df=DACReportingTool::nih_dac_action_table) {
+dar.review.timeline.summary <- function(start.date,end.date,df=get.nih.dac.action.table()) {
 
   submitted.df <- get.df.within.range(df,start.date,end.date,date.col="Submitted by PI")
   submitted.df["time_from_PI_submission_to_DAC_approval"] <- difftime(to.time(submitted.df[,"Approved by DAC"]), to.time(submitted.df[,"Submitted by PI"]),units = "days")

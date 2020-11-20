@@ -14,10 +14,10 @@ To download the package, use
 install_github("https://github.com/cmarcum/DAC-Report/") 
 ```
 # Data Source
-We use the [dbGaP Data Access and Use Report page](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi) as our primary data source and this package serves as a programmatic interface to easily retrieve the data and automatically generate an DAC-specific data report. Currently the package stores all DAC action data (last update: 11/04/2020) locally [(example)](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?DAC=all&actType=all&stDate=04/23/2020&endDate=10/22/2020]). To load the data into R environment use:
+We use the [dbGaP Data Access and Use Report page](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi) as our primary data source and this package serves as a programmatic interface to easily retrieve the data and automatically generate an DAC-specific data report. Currently the package stores all DAC action data (last update: 11/04/2020) locally [(example)](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?DAC=all&actType=all&stDate=04/23/2020&endDate=10/22/2020]). To use the data:
 ```
 library(DACReportingTool)
-data("nih_dac_action_table")
+table1 <- get.nih.dac.action.table()
 ```
 And to update all locally stored data with the latest information from dbGaP, use:
 ```
@@ -28,9 +28,9 @@ dac.data.update.all()
 
 One of the main goals of the package is to make summary statistics of DAC activities data easily accessible. Here are some of the tables that can be computed using this package:
 
-`nih_dac_action_table`, for table schema see and example [link](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?DAC=all&actType=all&stDate=04/23/2020&endDate=10/22/2020)
+The NIH DAC Action Table, for table schema see  [link](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?DAC=all&actType=all&stDate=04/23/2020&endDate=10/22/2020)
 
-`all_nih_studies_table` for table schema see [link](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?stDate=04%2F28%2F2020&endDate=05%2F28%2F2020&retTable=tablea1) (equivalent of table a1)
+All NIH Studies Table, for table schema see [link](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/DataUseSummary.cgi?stDate=04%2F28%2F2020&endDate=05%2F28%2F2020&retTable=tablea1) (equivalent of table a1)
 
 `get.study.summary.table()`
 Returns a summary dataframe of all DAC which had DAR approved in the given timeframe. See documentation for table schema.

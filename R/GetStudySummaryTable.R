@@ -42,7 +42,7 @@
 #'}
 #'
 #' @export
-get.study.summary.table <- function(start.date = '2000-01-01',end.date=format(Sys.Date()), df=DACReportingTool::nih_dac_action_table) {
+get.study.summary.table <- function(start.date = '2000-01-01',end.date=format(Sys.Date()), df=get.nih.dac.action.table()) {
   submitted.df <- get.df.within.range(df,start.date,end.date,date.col="Submitted by PI")
   submitted.df$`TimeToApproval` <- difftime(to.time(submitted.df[,'Approved by DAC']),to.time(submitted.df[,'Submitted by PI']), units="days")
 
@@ -54,6 +54,6 @@ get.study.summary.table <- function(start.date = '2000-01-01',end.date=format(Sy
   studies.big.table <- merge(studies.big.table,studies.avg.approval.time.table, by="StudyAccession")
   colnames(studies.big.table) <- c("StudyAccesion","TotalRequest","TotalApproved","TotalRejected","TotalDownload","AvgApprovalTime")
 
-  studies.big.table <- merge(studies.big.table,DACReportingTool::all_nih_dac_studies_table, by.x='StudyAccesion', by.y='Study Accession',all.x=TRUE)
+  studies.big.table <- merge(studies.big.table,get.all.nih.dac.studies.table(), by.x='StudyAccesion', by.y='Study Accession',all.x=TRUE)
   return(studies.big.table)
 }

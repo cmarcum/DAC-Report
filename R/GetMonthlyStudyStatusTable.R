@@ -36,7 +36,7 @@
 #' }
 #'
 #'
-get.monthly.study.status.table <- function(start.date,end.date,studies.df=DACReportingTool::all_nih_dac_studies_table,action.table.df=DACReportingTool::nih_dac_action_table) {
+get.monthly.study.status.table <- function(start.date,end.date,studies.df=get.all.nih.dac.studies.table(),action.table.df=get.nih.dac.action.table()) {
 
   # Aggregate of studies released by month
   temp_studies_table <- studies.df
