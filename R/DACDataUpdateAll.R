@@ -6,6 +6,9 @@
 #' @return NULL
 #' @export
 #'
+#' @param update.to String, date in 'yyyy-mm-dd' format. The date to update the data to
+#' @param wait.for number, seconds to wait for before sending another request to retrieve phs study
+#'
 #' @examples \dontrun{
 #' dac.data.update.all()
 #' }
