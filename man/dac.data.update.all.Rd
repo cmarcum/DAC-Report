@@ -9,6 +9,11 @@ dac.data.update.all(
   wait.for = 2
 )
 }
+\arguments{
+\item{update.to}{String, date in 'yyyy-mm-dd' format. The date to update the data to}
+
+\item{wait.for}{number, seconds to wait for before sending another request to retrieve phs study}
+}
 \description{
 Updates every table that are locally stored in the package. Including
 the nih_dac_actions_table and the all_nih_dac_studies_table

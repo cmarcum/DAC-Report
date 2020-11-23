@@ -15,10 +15,13 @@
 #'   \item{Number ofparticipants}{The number of participants included in the study}
 #' }
 #'
-#' @return
+#' @return dataframe
 #' @export
 #'
-#' @examples
+#' @examples \dontrun{
+#' table <- get.phs.studies.table()
+#' }
+#'
 get.phs.studies.table <- function() {
   load(system.file("phs_studies_table.rda", package = "DACReportingTool"))
   return(phs_studies_table)

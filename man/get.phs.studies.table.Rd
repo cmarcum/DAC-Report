@@ -19,10 +19,16 @@ A data frame with 7 variables:
 get.phs.studies.table()
 }
 \value{
-
+dataframe
 }
 \description{
 This table contains some of the meta information about each studies that are listed
 under the all_nih_dac_actions table. The data is obtained through scraping the content
 on dbGAP
+}
+\examples{
+\dontrun{
+table <- get.phs.studies.table()
+}
+
 }
