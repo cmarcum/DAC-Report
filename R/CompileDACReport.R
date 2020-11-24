@@ -49,7 +49,7 @@ compile.dac.report <- function(dac, author, start.date, end.date,...) {
   pi.requests.table.selected.time <- get.pi.table(start.date,end.date)
 
   print('Computing Monthly Approval Time Median Table...')
-  approval.time.moving.avg.table <- get.approval.time.moving.average(start.date,end.date,dac.specific.action.table)
+  approval.time.diff.table <- get.approval.time.diff.table(start.date,end.date,dac.specific.action.table)
 
   print('All tables calculated. Rendering...')
 
@@ -66,7 +66,7 @@ compile.dac.report <- function(dac, author, start.date, end.date,...) {
   study.status.table.dac=study.status.table.dac,
   pi.requests.table.overall=pi.requests.table.overall,
   pi.requests.table.selected.time=pi.requests.table.selected.time,
-  approval.time.moving.avg.table=approval.time.moving.avg.table
+  approval.time.diff.table=approval.time.diff.table
    ),...)
 
   shell.exec(system.file("report.docx", package="DACReportingTool"))
