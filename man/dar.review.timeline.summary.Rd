@@ -36,7 +36,7 @@ Returns a summary dataframe of all DAC which had DAR submitted in the given time
 }
 \examples{
 \dontrun{
-> dar.review.timeline.summary("2020-01-01","2020-10-15",df=nih_dac_action_table)
+> dar.review.timeline.summary("2020-01-01","2020-10-15")
               DAC AvgApprovalTime MedApprovalTime DARDailyAvg DARDailySD DARTotal
 1            CDAC  14.916372 days  11.356944 days  0.66782007  2.5414008      193
 2          ES DAC  24.247849 days  12.220139 days  0.21453287  0.7788412       62
