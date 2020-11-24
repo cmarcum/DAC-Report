@@ -46,11 +46,56 @@ construct.study.to.study.adj.mat <- function(study.list,self.loop=FALSE) {
 #' @export
 #'
 #' @examples \dontrun{
-#' save.study.to.study.adj.mat
+#' save.study.to.study.adj.mat()
 #' }
 save.study.to.study.adj.mat <- function(){
   all.studies.ids <- unique(get.nih.dac.action.table()[,'Study accesion'])
   study.to.study.adj.df <- construct.study.to.study.adj.mat(all.studies.ids)
   print("Saving Study to Study DF")
   save(study.to.study.adj.df, file = "StudyToStudyDF.rda",compress = 'xz')
+}
+
+
+#' Get Study to Study Adjacency Matrix
+#'
+#' Returns the locally stored study-to-study adjacency matrix. See documentation
+#' on construct.study.to.study.adj.mat for detail.
+#'
+#' @return matrix
+#' @export
+#'
+#' @examples \dontrun{
+#' study.to.study.adj.df <- get.study.to.study.adj.mat()
+#' }
+get.study.to.study.adj.mat <- function() {
+  load(system.file("StudyToStudyDF.rda", package = "DACReportingTool"))
+  return(study.to.study.adj.df)
+}
+
+
+pca.plot.studies <- function(adj.mat=get.study.to.study.adj.mat()) {
+
+  # Min max normalize
+  adj.mat.norm <- as.data.frame(apply(adj.mat, 2, FUN=function(x){min_max_norm(x)}))
+
+  # Fill NA with 0
+  adj.mat.norm[is.na(adj.mat.norm)] <- 0
+
+  # PCA
+  print("PCA-ing...")
+  pca.study <- stats::prcomp(adj.mat.norm)
+
+  # Add DAC labels
+  dac.df <- get.nih.dac.action.table()[c('Study accesion','DAC')]
+  dac.df <- dac.df[!duplicated(dac.df$`Study accesion`),]
+
+  adj.mat.names <- rownames(adj.mat)
+
+  new.df <- data.frame("phs_id"=adj.mat.names)
+  new.df.merged <- merge(new.df,dac.df,all.x=TRUE,by.x='phs_id',by.y='Study accesion')
+
+  adj.mat.norm$DAC <- new.df.merged$DAC
+
+  return(adj.mat.norm)
+  ggplot2::autoplot(pca.study, data=adj.mat.norm, colour='DAC')
 }
