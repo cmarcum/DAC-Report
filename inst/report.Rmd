@@ -42,6 +42,8 @@ dac.row <- timeline.summary.table[timeline.summary.table['DAC'] == dac,]
 num.dars.in.window <- dac.row[,'TotalRequests']
 number.of.accepted <- dac.row[,'TotalApproved']
 number.of.rejected <- dac.row[,'TotalRejected']
+number.of.downloaded <- dac.row[,'Downloaded']
+number.of.prev.download <- dac.row[,'PreviouslyDownloaded']
 
 avg.accept <- as.numeric(dac.row[,'AvgApprovalTime'])
 avg.reject <- as.numeric(dac.row[,'AvgRejectionTime'])
@@ -52,7 +54,7 @@ The `r dac` Data Access Committee (DAC) currently manages `r dac.total.dars` dat
 
 # Data Access Requests
 
-Between `r params$start.date` and `r params$end.date` `r dac` reviewed `r num.dars.in.window` DARs. Of these, `r number.of.accepted` were accepted while `r number.of.rejected` were rejected.  The average amount of time from when the Principle Investigator (PI) submited a DAR to the final decision by the DAC was `r round(avg.final,1)` days.  The average time to an accepted decision was `r round(avg.accept,1)` days, while the average time to a rejected decision was `r round(avg.reject,1)` days.  Figure \@ref(fig:compline) is a barplot comparing the `r dac` DAC to time to final decision to the average across all NIH DACs during the same time interval.  
+Between `r params$start.date` and `r params$end.date` `r dac` reviewed `r num.dars.in.window` DARs. Of these, `r number.of.accepted` were accepted, `r number.of.downloaded` were downloaded, `r number.of.prev.download` have previous version downloaded and `r number.of.rejected` were rejected.   The average amount of time from when the Principle Investigator (PI) submited a DAR to the final decision by the DAC was `r round(avg.final,1)` days.  The average time to an accepted decision was `r round(avg.accept,1)` days, while the average time to a rejected decision was `r round(avg.reject,1)` days.  Figure \@ref(fig:compline) is a barplot comparing the `r dac` DAC to time to final decision to the average across all NIH DACs during the same time interval.  
 
 ```{r compline, fig.cap="Comparison of DAR Processing Time among all DACs", echo=FALSE, warning=FALSE ,message=FALSE}
 timeline.summary.table <- timeline.summary.table %>% dplyr::mutate(ToHighlight = ifelse( DAC == params$dac, "yes", "no" ))
