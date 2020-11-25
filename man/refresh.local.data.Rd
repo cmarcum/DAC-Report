@@ -13,7 +13,8 @@ refresh.local.data(start.date = as.Date("2000-01-01"), end.date = Sys.Date())
 }
 \description{
 In case of data corruption, request all data and overwrite the existing locally
-stored data. Use
+stored data. If error arises or the request takes too long, try picking a smaller
+timeframe then use dac.data.update.all()
 }
 \examples{
 \dontrun{

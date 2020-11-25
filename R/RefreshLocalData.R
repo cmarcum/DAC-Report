@@ -1,7 +1,8 @@
 #' Refresh Local Data
 #'
 #' In case of data corruption, request all data and overwrite the existing locally
-#' stored data. Use
+#' stored data. If error arises or the request takes too long, try picking a smaller
+#' timeframe then use dac.data.update.all()
 #'
 #' @param start.date the earliest date to get data from. Defaults to be 2000-01-01
 #' @param end.date the latest date to get data from. Default to be the system date

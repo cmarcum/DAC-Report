@@ -43,9 +43,10 @@ request.all.dac.action.table <- function(start.date,end.date) {
 #' @export
 dac.action.table.update <- function(update.to=format(Sys.Date(),"%m/%d/%Y"),overwrite=TRUE,return.table=FALSE) {
   print("Updating DAC Action Table...")
-  load(system.file("nih_dac_action_table.rda", package = "DACReportingTool"))
+  nih_dac_action_table <- get.nih.dac.action.table()
   update.to <- as.Date(update.to,"%m/%d/%Y")
   cur.table.latest <- get.latest.approved.dar.date()
+
   # Get table starting from latest date, append to current table
   new.table <- request.all.dac.action.table(format(cur.table.latest,"%m/%d/%Y"),format(update.to,"%m/%d/%Y"))
   combined.table <- dplyr::bind_rows(nih_dac_action_table,new.table)
