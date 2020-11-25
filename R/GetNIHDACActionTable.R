@@ -31,5 +31,9 @@
 #'
 get.nih.dac.action.table <- function() {
   load(system.file("nih_dac_action_table.rda", package = "DACReportingTool"))
+  if(!exists("nih_dac_action_table")) {
+    stop("nih_dac_action_table variable not found. Was the locally file renamed and overwritten?
+         To obtain a fresh copy use refresh.local.data()")
+  }
   return(nih_dac_action_table)
 }

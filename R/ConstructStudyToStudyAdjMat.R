@@ -73,9 +73,30 @@ get.study.to.study.adj.mat <- function() {
 }
 
 
+#' PCA Plot of network adjacency matrix
+#'
+#' This function is currently EXPERIMENTAL and the method is not vigorously verified.
+#' Any conclusion drawn from the plotted figure should be treated with caution.
+#'
+#' Given the adjacency matrix of study to study matrix, where edge weight indicates
+#' the number of PIs who requested the two studies together, plot a PCA-reduced version
+#' of the adjancency matrix in 2 dimension, colored by DAC.
+#'
+#' The following operations are preformed to produce the plot: The adjacency matrix
+#' is first min-max normalized column-wise, NAs are filled by 0, then the adjancency
+#' matrix is reduced to 2 dimension.
+#'
+#' @param adj.mat The adjacency matrix to be used to plot, By default the study to study adjacency matrix
+#'
+#' @return ggplot figure
+#' @export
+#'
+#' @examples \dontrun{
+#' pca.plot.studies()
+#' }
 pca.plot.studies <- function(adj.mat=get.study.to.study.adj.mat()) {
 
-  # Min max normalize
+  # Min max normalize column-wise
   adj.mat.norm <- as.data.frame(apply(adj.mat, 2, FUN=function(x){min_max_norm(x)}))
 
   # Fill NA with 0
@@ -95,7 +116,5 @@ pca.plot.studies <- function(adj.mat=get.study.to.study.adj.mat()) {
   new.df.merged <- merge(new.df,dac.df,all.x=TRUE,by.x='phs_id',by.y='Study accesion')
 
   adj.mat.norm$DAC <- new.df.merged$DAC
-
-  return(adj.mat.norm)
   ggplot2::autoplot(pca.study, data=adj.mat.norm, colour='DAC')
 }
