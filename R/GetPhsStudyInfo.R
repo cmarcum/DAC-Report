@@ -129,3 +129,26 @@ update.phs.studies.table <- function(overwrite=TRUE,return.table=FALSE,wait.for=
     return(big.df)
   }
 }
+
+# Retrieve the main disease focus given the phs number
+request.phs.study.focus <- function(phs_id) {
+  base.url <- "https://www.ncbi.nlm.nih.gov/gap/advanced_search/search/"
+  post.options <- list(
+    obj_type = "study",
+    term = phs_id,
+    page_start = 0,
+    page_rows = 10,
+    facets_applied = list(
+      is_exclude_id_type_variable = "no"
+    )
+  )
+  res <- httr::POST(base.url, body = post.options, encode = "json")
+  res.content <- httr::content(res)
+  report <- res.content$REPORT
+  if (length(report) > 0) {
+    study <- report[[1]]
+    study.main.disease <- study$study_main_disease_txt
+    return(study.main.disease)
+  }
+  return(NA)
+}

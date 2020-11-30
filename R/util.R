@@ -82,3 +82,7 @@ get.latest.approved.dar.date <- function() {
   cur.table.latest <- as.Date(max(converted.date ,na.rm = TRUE))
   return(cur.table.latest)
 }
+
+min_max_norm <- function(x) {
+  (x - min(x)) / (max(x) - min(x))
+}

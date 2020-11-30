@@ -21,5 +21,9 @@
 #' @export
 get.all.nih.dac.studies.table <- function() {
   load(system.file("all_nih_dac_studies_table.rda", package = "DACReportingTool"))
+  if(!exists("all_nih_dac_studies_table")) {
+    stop("all_nih_dac_studies_table variable not found. Was the locally file renamed and overwritten?
+         To obtain a fresh copy use refresh.local.data()")
+  }
   return(all_nih_dac_studies_table)
 }

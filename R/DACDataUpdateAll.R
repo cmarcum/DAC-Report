@@ -15,7 +15,7 @@
 #'
 dac.data.update.all <- function(update.to=format(Sys.Date(),"%m/%d/%Y"),wait.for=2) {
   dac.action.table.update(update.to=update.to,overwrite=TRUE,return.table=FALSE)
-  update.phs.studies.table(overwrite=TRUE,return.table=FALSE,wait.for=wait.for)
+  #update.phs.studies.table(overwrite=TRUE,return.table=FALSE,wait.for=wait.for)
   all_nih_dac_studies_table <- request.all.nih.dac.studies.table()
   save(all_nih_dac_studies_table, file = system.file("all_nih_dac_studies_table.rda", package = "DACReportingTool"), compress="xz")
   print("All tables updated")

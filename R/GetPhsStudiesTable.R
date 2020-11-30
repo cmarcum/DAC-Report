@@ -24,5 +24,9 @@
 #'
 get.phs.studies.table <- function() {
   load(system.file("phs_studies_table.rda", package = "DACReportingTool"))
+  if(!exists("phs_studies_table")) {
+    stop("phs_studies_table variable not found. Was the locally file renamed and overwritten?
+         To obtain a fresh copy use refresh.local.data()")
+  }
   return(phs_studies_table)
 }
