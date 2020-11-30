@@ -45,7 +45,7 @@ For a complete list of all available tables, see files under the R/ directory an
 One of the features of this package is the ability to generate a DAC-specific summary report for a given window of time. For example, to generate the NIAID DAC report for all activities occurring between the first of January, 2015 and the end of June, 2015: 
 
 ```
-compile.dac.report(dac='NIAID',author='Hoyin Chu, Christopher Marcum', start.date='2015-01-01', end.date='2015-06-30')
+compile.dac.report(dac='CDAC',author='Committee Chair', start.date='2019-01-01', end.date='2020-01-01')
 ```
 
 This function uses an internal R Markdown template that compiles its output to a Microsoft Word (.docx) document. The report will automatically open using whatever compatible software you have available (i.e., MS-Word, Office 365, LibreOffice). The report contains figures, tables, and basic summary interpretation. Be sure to save this report to your Desktop or other appropriate location as it is only stored in a temporary location while it's open. Close the opened .docx file before generating a new one to avoid errors.
