@@ -1,8 +1,7 @@
 #' Refresh Local Data
 #'
 #' In case of data corruption, request all data and overwrite the existing locally
-#' stored data. If error arises or the request takes too long, try picking a smaller
-#' timeframe then use dac.data.update.all()
+#' stored data.
 #'
 #' @param start.date the earliest date to get data from. Defaults to be 2000-01-01
 #' @param end.date the latest date to get data from. Default to be the system date
@@ -16,10 +15,20 @@
 #'
 refresh.local.data <- function(start.date=as.Date("2000-01-01"),end.date=Sys.Date()) {
   print("Downloading tables to be used locally for DACReportingTool...")
-  all.dac.action.table <- request.all.dac.action.table(format(start.date,"%m/%d/%Y"),format(end.date,"%m/%d/%Y"))
-  all.nih.dac.studies.table <- request.all.nih.dac.studies.table(start.date,end.date)
+  date.ranges <- as.list(seq(start.date,end.date,by="1 year"))
+  date.ranges[[length(date.ranges) + 1]] <- end.date
+  table.list <- list()
+  for (i in 1:(length(date.ranges)-1)) {
+    action.table <- request.all.dac.action.table(format(date.ranges[[i]],"%m/%d/%Y"),format(date.ranges[[i+1]],"%m/%d/%Y"))
+    table.list[[i]] <- action.table
+  }
+  nih_dac_action_table <- data.table::rbindlist(table.list,fill = TRUE)
+  nih_dac_action_table <- nih_dac_action_table[!duplicated(nih_dac_action_table$DAR, fromLast=T),]
+
+  all_nih_dac_studies_table <- request.all.nih.dac.studies.table(format(start.date,"%m/%d/%Y"),format(end.date,"%m/%d/%Y"))
+
   print("Overwriting existing tables...")
-  save(all.dac.action.table,file = system.file("nih_dac_action_table.rda", package = "DACReportingTool"), compress = "xz")
-  save(all.nih.dac.studies.table, file = system.file("all_nih_dac_studies_table.rda", package = "DACReportingTool"), compress="xz")
+  save(nih_dac_action_table,file = system.file("nih_dac_action_table.rda", package = "DACReportingTool"), compress = "xz")
+  save(all_nih_dac_studies_table, file = system.file("all_nih_dac_studies_table.rda", package = "DACReportingTool"), compress="xz")
   print("Refresh Complete")
 }
