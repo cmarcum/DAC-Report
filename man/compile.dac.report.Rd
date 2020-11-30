@@ -27,7 +27,7 @@ generated report will be a word document.
 }
 \examples{
 \dontrun{
-compile.dac.report('NIAID','Hoyin Chu, Christopher Marcum', '2015-01-01', '2019-12-31')
+compile.dac.report('CDAC','Committee Chair', '2019-01-01', '2020-01-01')
 }
 
 }
