@@ -1,6 +1,6 @@
 #' Refresh Local Data
 #'
-#' In case of data corruption, request all data and overwrite the existing locally
+#' Request all data and overwrite the existing locally
 #' stored data.
 #'
 #' @param start.date the earliest date to get data from. Defaults to be 2000-01-01
@@ -20,7 +20,9 @@ refresh.local.data <- function(start.date=as.Date("2000-01-01"),end.date=Sys.Dat
   table.list <- list()
   for (i in 1:(length(date.ranges)-1)) {
     action.table <- request.all.dac.action.table(format(date.ranges[[i]],"%m/%d/%Y"),format(date.ranges[[i+1]],"%m/%d/%Y"))
-    table.list[[i]] <- action.table
+    if (nrow(action.table) > 0) {
+      table.list[[i]] <- action.table
+    }
   }
   nih_dac_action_table <- data.table::rbindlist(table.list,fill = TRUE)
   nih_dac_action_table <- nih_dac_action_table[!duplicated(nih_dac_action_table$DAR, fromLast=T),]

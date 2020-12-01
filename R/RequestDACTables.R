@@ -101,7 +101,7 @@ get.data.use.summary.table <- function(request.url,table.xpath) {
   names(big.df) <- big.df[1,]
   big.df <- big.df[-1,]
   # remove beginning and trailing white spaces
-  clean.df <- as.data.frame(apply(big.df,2, trimws, which="both"))
+  clean.df <- as.data.frame(apply(big.df,2,trimws,which="both"))
   return(clean.df)
 }
 
