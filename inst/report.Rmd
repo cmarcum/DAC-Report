@@ -10,6 +10,7 @@ params:
   nih.dac.action.table: "nih_dac_action_table"
   timeline.summary.table: "timeline.summary.table"
   study.summary.table: "study.summary.table"
+  top.study.term.freq.table: "top.study.term.freq.table"
   study.status.table.all: "study.status.table.all"
   study.status.table.dac: "study.status.table.dac"
   pi.requests.table.overall: "pi.requests.table.overall"
@@ -89,12 +90,19 @@ dar.request.growth.plot
 
 
 ```{r fig.cap="DAR Processing Time: From PI Submission to SO Approval", echo=FALSE, warning=FALSE ,message=FALSE}
+# calculates the highest whisker for all boxplots
+approval.time.top.ylims <- stats::aggregate(approval.time.diff.table["ApprovalTimeFromPIToSO"],
+                                           by=list(Month=approval.time.diff.table$ApprovedMonth),
+                                           FUN = function(x){ boxplot.stats(as.numeric(x))$stats[5] }
+                                           )
+# Take the max one and use it as ylim
+ylim1 <- c(0,max(approval.time.top.ylims$ApprovalTimeFromPIToSO))
+#ylim1 <- boxplot.stats(as.numeric(approval.time.diff.table$ApprovalTimeFromPIToSO))$stats[c(1, 5)]
 
-ylim1 <- boxplot.stats(as.numeric(approval.time.diff.table$ApprovalTimeFromPIToSO))$stats[c(1, 5)]
 
 approval.time.from.PI.to.SO.plot <- ggplot(approval.time.diff.table, aes(factor(ApprovedMonth), ApprovalTimeFromPIToSO)) +
-  geom_boxplot() + 
-  # coord_cartesian(ylim = ylim1*1.05) +
+  geom_boxplot(outlier.shape = NA) + 
+  coord_cartesian(ylim = ylim1*1.05) +
   scale_y_continuous(n.breaks = 8) +
   stat_summary(fun=median, colour="cornflowerblue", aes(y=ApprovalTimeFromPIToSO,group=1),
                geom="line", group=1, size=2) +
@@ -106,11 +114,16 @@ approval.time.from.PI.to.SO.plot
 ```
 
 ```{r fig.cap="DAR Processing Time: From SO Approval to DAC Approval", echo=FALSE, warning=FALSE ,message=FALSE}
-ylim2 <- boxplot.stats(as.numeric(approval.time.diff.table$ApprovalTimeFromSOToDAC))$stats[c(1, 5)]
+approval.time.top.ylims <- stats::aggregate(approval.time.diff.table["ApprovalTimeFromSOToDAC"],
+                                           by=list(Month=approval.time.diff.table$ApprovedMonth),
+                                           FUN = function(x){ boxplot.stats(as.numeric(x))$stats[5] }
+                                           )
+
+ylim2 <- c(0,max(approval.time.top.ylims$ApprovalTimeFromSOToDAC))
 
 approval.time.from.SO.to.DAC.plot <- ggplot(approval.time.diff.table, aes(factor(ApprovedMonth), ApprovalTimeFromSOToDAC)) +
-  geom_boxplot() + 
-  # coord_cartesian(ylim = ylim2*1.05) +
+  geom_boxplot(outlier.shape = NA) + 
+  coord_cartesian(ylim = ylim2*1.05) +
   scale_y_continuous(n.breaks = 8) +
   stat_summary(fun=median, colour="cornflowerblue", aes(y=ApprovalTimeFromSOToDAC,group=1),
                geom="line", group=1, size=2) +
@@ -122,10 +135,15 @@ approval.time.from.SO.to.DAC.plot
 ```
 
 ```{r fig.cap="DAR Processing Time: From PI Submission to DAC Approval", echo=FALSE, warning=FALSE ,message=FALSE}
-ylim3 <- boxplot.stats(as.numeric(approval.time.diff.table$ApprovalTimeFromPIToDAC))$stats[c(1, 5)]
+approval.time.top.ylims <- stats::aggregate(approval.time.diff.table["ApprovalTimeFromPIToDAC"],
+                                           by=list(Month=approval.time.diff.table$ApprovedMonth),
+                                           FUN = function(x){ boxplot.stats(as.numeric(x))$stats[5] }
+                                           )
 
-approval.time.from.PI.to.DAC.plot <- ggplot(approval.time.diff.table, aes(factor(ApprovedMonth), ApprovalTimeFromPIToDAC)) + geom_boxplot() + 
-  # coord_cartesian(ylim = ylim3*1.05) +
+ylim3 <- c(0,max(approval.time.top.ylims$ApprovalTimeFromPIToDAC))
+
+approval.time.from.PI.to.DAC.plot <- ggplot(approval.time.diff.table, aes(factor(ApprovedMonth), ApprovalTimeFromPIToDAC)) + geom_boxplot(outlier.shape = NA) + 
+  coord_cartesian(ylim = ylim3*1.05) +
   # scale_x_discrete(labels = format(as.Date(approval.time.diff.table$ApprovedMonth), "%m/%Y")) +
   scale_y_continuous(n.breaks = 8) +
   stat_summary(fun=median, colour="cornflowerblue", aes(y=ApprovalTimeFromPIToDAC,group=1),
@@ -185,6 +203,14 @@ During this reporting period, `r new.studies.released` new studies were released
 
 ```{r include=FALSE}
 study.released.fig.cap <- sprintf("Number of Study Released by %s Per Month Since 2015", dac)
+word.cloud.fig.cap <- sprintf("Word cloud of Study %s (%s)",phs.popular.this.dac,phs.popular.this.dac.study.name)
+```
+
+```{r fig.cap=word.cloud.fig.cap, echo=FALSE, warning=FALSE ,message=FALSE}
+library(wordcloud)
+library(RColorBrewer)
+
+wordcloud(words = top.study.term.freq.table$word, freq = top.study.term.freq.table$freq, min.freq = 1, max.words=200, random.order=FALSE, rot.per=0.1, colors=RColorBrewer::brewer.pal(8, "Dark2"))
 ```
 
 

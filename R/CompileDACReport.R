@@ -38,6 +38,13 @@ compile.dac.report <- function(dac, author, start.date, end.date,...) {
   print('Computing Study Summary Table...')
   study.summary.table <- get.study.summary.table(start.date,end.date)
 
+  print("Computing Top Study Term Frequency Table...")
+  dac.study.summary.table <- study.summary.table[study.summary.table['DAC'] == dac,]
+  dac.study.summary.table <- get.df.within.range(dac.study.summary.table,start.date,end.date,"Study Release Date")
+  dac.study.summary.table.ordered <- dac.study.summary.table[order(-dac.study.summary.table$TotalRequest),]
+  phs.popular.this.dac <- dac.study.summary.table.ordered[1,]['StudyAccesion']$StudyAccesion
+  top.study.term.freq.table <- get.phs.study.term.frequency.table(phs.popular.this.dac)
+
   print('Computing Monthly Study Status Table...')
   study.status.table.all <- get.monthly.study.status.table('2000-01-01',Sys.Date())
   study.status.table.all <- study.status.table.all[study.status.table.all$Month >= as.Date('2015-01-01'),]
@@ -62,6 +69,7 @@ compile.dac.report <- function(dac, author, start.date, end.date,...) {
   nih.dac.action.table=nih_dac_action_table,
   timeline.summary.table=timeline.summary.table,
   study.summary.table=study.summary.table,
+  top.study.term.freq.table=top.study.term.freq.table,
   study.status.table.all=study.status.table.all,
   study.status.table.dac=study.status.table.dac,
   pi.requests.table.overall=pi.requests.table.overall,

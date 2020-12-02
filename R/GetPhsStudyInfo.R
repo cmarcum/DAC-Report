@@ -131,11 +131,11 @@ update.phs.studies.table <- function(overwrite=TRUE,return.table=FALSE,wait.for=
 }
 
 # Retrieve the main disease focus given the phs number
-request.phs.study.focus <- function(phs_id) {
+request.phs.study.focus <- function(phs.id) {
   base.url <- "https://www.ncbi.nlm.nih.gov/gap/advanced_search/search/"
   post.options <- list(
     obj_type = "study",
-    term = phs_id,
+    term = phd.id,
     page_start = 0,
     page_rows = 10,
     facets_applied = list(
@@ -152,3 +152,62 @@ request.phs.study.focus <- function(phs_id) {
   }
   return(NA)
 }
+
+# Retrieve all approved requester and their research use statement given phd id
+request.phs.research.statements <- function(phs.id,as.text=FALSE) {
+  base.url <- "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/GetAuthorizedRequestDownload.cgi?study_id=%s"
+  request.url  <- sprintf(base.url,phs.id)
+  res <- httr::GET(request.url)
+  res.content <- httr::content(res)
+
+  if (as.text) {
+    return(res.content)
+  }
+
+  content.table <- read.delim2(text=res.content, sep = '\t',header=FALSE)
+  emptycols <- sapply(content.table, function (k) all(is.na(k)))
+  content.table <- content.table[!emptycols]
+
+  # Use first row as column headers
+  names(content.table) <- content.table[1,]
+  content.table <- content.table[-1,]
+
+  return(content.table)
+}
+
+# Reference: http://www.sthda.com/english/wiki/text-mining-and-word-cloud-fundamentals-in-r-5-simple-steps-you-should-know
+# Given Phs id return a matrix with words and their frequency
+get.phs.study.term.frequency.table <- function(phs.id) {
+  raw.text <- request.phs.research.statements(phs.id)$`Technical Research Use Statement`
+  docs <- tm::Corpus(tm::VectorSource(raw.text))
+  # return(docs)
+  to.space <- tm::content_transformer(function (x, pattern) gsub(pattern, " ", x))
+  docs <- tm::tm_map(docs, to.space, "/")
+  docs <- tm::tm_map(docs, to.space, "@")
+  docs <- tm::tm_map(docs, to.space, "\\|")
+  # Convert the text to lower case
+  docs <- tm::tm_map(docs, tm::content_transformer(tolower))
+  # Remove numbers
+  docs <- tm::tm_map(docs, tm::removeNumbers)
+  # Remove english common stopwords
+  docs <- tm::tm_map(docs, tm::removeWords, tm::stopwords("english"))
+
+  custom.stop.words <- c("data","will","phs","study","use","can","dataset","also","use","used","using","datasets")
+  docs <- tm::tm_map(docs, tm::removeWords, custom.stop.words)
+
+  # Remove punctuations
+  docs <- tm::tm_map(docs, tm::removePunctuation)
+  # Eliminate extra white spaces
+  docs <- tm::tm_map(docs, tm::stripWhitespace)
+
+  dtm <- tm::TermDocumentMatrix(docs)
+  m <- as.matrix(dtm)
+  v <- sort(rowSums(m),decreasing=TRUE)
+  d <- data.frame(word = names(v),freq=v)
+
+  # return(wordcloud::wordcloud(words = d$word, freq = d$freq, min.freq = 1,
+  #           max.words=200, random.order=FALSE, rot.per=0.1, colors=RColorBrewer::brewer.pal(8, "Dark2")))
+
+  return(d)
+}
+
