@@ -42,8 +42,13 @@ compile.dac.report <- function(dac, author, start.date, end.date,...) {
   dac.study.summary.table <- study.summary.table[study.summary.table['DAC'] == dac,]
   dac.study.summary.table <- get.df.within.range(dac.study.summary.table,start.date,end.date,"Study Release Date")
   dac.study.summary.table.ordered <- dac.study.summary.table[order(-dac.study.summary.table$TotalRequest),]
-  phs.popular.this.dac <- dac.study.summary.table.ordered[1,]['StudyAccesion']$StudyAccesion
-  top.study.term.freq.table <- get.phs.study.term.frequency.table(phs.popular.this.dac)
+  if (nrow(dac.study.summary.table.ordered) == 0) {
+    phs.popular.this.dac <- NA
+    top.study.term.freq.table <- NA
+  } else {
+    phs.popular.this.dac <- dac.study.summary.table.ordered[1,]['StudyAccesion']$StudyAccesion
+    top.study.term.freq.table <- get.phs.study.term.frequency.table(phs.popular.this.dac)
+  }
 
   print('Computing Monthly Study Status Table...')
   study.status.table.all <- get.monthly.study.status.table('2000-01-01',Sys.Date())

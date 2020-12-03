@@ -132,10 +132,19 @@ update.phs.studies.table <- function(overwrite=TRUE,return.table=FALSE,wait.for=
 
 # Retrieve the main disease focus given the phs number
 request.phs.study.focus <- function(phs.id) {
+  study.json <- request.phs.advanced.search.result.json(phs.id)
+  if (!is.na(study.json)) {
+    return(study.json$study_main_disease_txt)
+  }
+}
+
+
+# Retrieves the json of the first study result of dbgap advanced search
+request.phs.advanced.search.result.json <- function(phs.id) {
   base.url <- "https://www.ncbi.nlm.nih.gov/gap/advanced_search/search/"
   post.options <- list(
     obj_type = "study",
-    term = phd.id,
+    term = phs.id,
     page_start = 0,
     page_rows = 10,
     facets_applied = list(
@@ -147,8 +156,7 @@ request.phs.study.focus <- function(phs.id) {
   report <- res.content$REPORT
   if (length(report) > 0) {
     study <- report[[1]]
-    study.main.disease <- study$study_main_disease_txt
-    return(study.main.disease)
+    return(study)
   }
   return(NA)
 }
@@ -175,39 +183,36 @@ request.phs.research.statements <- function(phs.id,as.text=FALSE) {
   return(content.table)
 }
 
-# Reference: http://www.sthda.com/english/wiki/text-mining-and-word-cloud-fundamentals-in-r-5-simple-steps-you-should-know
-# Given Phs id return a matrix with words and their frequency
-get.phs.study.term.frequency.table <- function(phs.id) {
-  raw.text <- request.phs.research.statements(phs.id)$`Technical Research Use Statement`
-  docs <- tm::Corpus(tm::VectorSource(raw.text))
-  # return(docs)
-  to.space <- tm::content_transformer(function (x, pattern) gsub(pattern, " ", x))
-  docs <- tm::tm_map(docs, to.space, "/")
-  docs <- tm::tm_map(docs, to.space, "@")
-  docs <- tm::tm_map(docs, to.space, "\\|")
-  # Convert the text to lower case
-  docs <- tm::tm_map(docs, tm::content_transformer(tolower))
-  # Remove numbers
-  docs <- tm::tm_map(docs, tm::removeNumbers)
-  # Remove english common stopwords
-  docs <- tm::tm_map(docs, tm::removeWords, tm::stopwords("english"))
-
-  custom.stop.words <- c("data","will","phs","study","use","can","dataset","also","use","used","using","datasets")
-  docs <- tm::tm_map(docs, tm::removeWords, custom.stop.words)
-
-  # Remove punctuations
-  docs <- tm::tm_map(docs, tm::removePunctuation)
-  # Eliminate extra white spaces
-  docs <- tm::tm_map(docs, tm::stripWhitespace)
-
-  dtm <- tm::TermDocumentMatrix(docs)
-  m <- as.matrix(dtm)
-  v <- sort(rowSums(m),decreasing=TRUE)
-  d <- data.frame(word = names(v),freq=v)
-
-  # return(wordcloud::wordcloud(words = d$word, freq = d$freq, min.freq = 1,
-  #           max.words=200, random.order=FALSE, rot.per=0.1, colors=RColorBrewer::brewer.pal(8, "Dark2")))
-
-  return(d)
+# Returns google scholar result count
+request.google.scholar.result.count <- function(term,start.year='',end.year='') {
+  base.url <- 'https://scholar.google.com/scholar?q=%s&as_ylo=%s&as_yhi=%s'
+  request.url <- sprintf(base.url,term,start.year,end.year)
+  res <- httr::GET(request.url)
+  res.content <- httr::content(res)
+  res.ele <- rvest::html_node(res.content, css="#gs_ab_md > .gs_ab_mdw")
+  res.ele.txt <- rvest::html_text(res.ele)
+  if (res.ele.txt == "") {
+    return(0)
+  } else {
+    res.count <- as.numeric(regmatches(res.ele.txt,regexpr('\\d+',res.ele.txt)))
+    return(res.count)
+  }
 }
 
+
+
+# Given list of phs id, create dataframe with their corresponding number
+# of search results on google scholar
+get.google.scholar.citation.table <- function(phs.id.list,wait.for=0.5){
+  citation.list <- list()
+  for (i in 1:length(phs.id.list)) {
+    phs.id.no.version <- extract.phs(phs.id.list[[i]])
+    citation.list[[i]] <- request.google.scholar.result.count(phs.id.no.version)
+    Sys.sleep(wait.for)
+    if (i %% 100 == 1) {
+      print(i)
+    }
+  }
+  d <- data.frame(I(phs.id.list), I(citation.list))
+  return(d)
+}

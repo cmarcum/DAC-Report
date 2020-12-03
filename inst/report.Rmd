@@ -194,9 +194,16 @@ new.studies.released <- nrow(dac.study.summary.table)
 
 new.studies.dar <- sum(dac.study.summary.table$TotalRequest, na.rm = TRUE)
 dac.study.summary.table.ordered <- dac.study.summary.table[order(-dac.study.summary.table$TotalRequest),]
-phs.popular.this.dac <- dac.study.summary.table.ordered[1,]['StudyAccesion']
-phs.popular.this.dac.study.name <- dac.study.summary.table.ordered[1,]['Study Name']
-phs.popular.this.dac.total.request <- dac.study.summary.table.ordered[1,]['TotalRequest']
+if (nrow(dac.study.summary.table.ordered) == 0) {
+  phs.popular.this.dac <- NA
+  phs.popular.this.dac.study.name <- NA
+  phs.popular.this.dac.total.request <- NA
+} else {
+  phs.popular.this.dac <- dac.study.summary.table.ordered[1,]['StudyAccesion']
+  phs.popular.this.dac.study.name <- dac.study.summary.table.ordered[1,]['Study Name']
+  phs.popular.this.dac.total.request <- dac.study.summary.table.ordered[1,]['TotalRequest']
+}
+
 ```
 
 During this reporting period, `r new.studies.released` new studies were released by `r dac` and a total of `r new.studies.dar` DARs were made for these studies. Study `r phs.popular.this.dac` (`r phs.popular.this.dac.study.name`) has been the most requested dataset from the `r dac` DAC with `r phs.popular.this.dac.total.request` requests.
@@ -209,8 +216,10 @@ word.cloud.fig.cap <- sprintf("Word cloud of Study %s (%s)",phs.popular.this.dac
 ```{r fig.cap=word.cloud.fig.cap, echo=FALSE, warning=FALSE ,message=FALSE}
 library(wordcloud)
 library(RColorBrewer)
-
-wordcloud(words = top.study.term.freq.table$word, freq = top.study.term.freq.table$freq, min.freq = 1, max.words=200, random.order=FALSE, rot.per=0.1, colors=RColorBrewer::brewer.pal(8, "Dark2"))
+if (!is.na(top.study.term.freq.table)) {
+  wordcloud(words = top.study.term.freq.table$word, freq = top.study.term.freq.table$freq, min.freq = 1, max.words=200,
+            random.order=FALSE, rot.per=0.1, colors=RColorBrewer::brewer.pal(8, "Dark2"))
+}
 ```
 
 

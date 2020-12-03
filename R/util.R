@@ -83,6 +83,13 @@ get.latest.approved.dar.date <- function() {
   return(cur.table.latest)
 }
 
+# Min max normalize the gievn vector
 min_max_norm <- function(x) {
   (x - min(x)) / (max(x) - min(x))
+}
+
+# Extracts the phs number in string without version number
+extract.phs <- function(phs.id) {
+  phs.num <- regmatches(phs.id,regexpr('.+?(?=\\.)',phs.id, perl = TRUE))
+  return(phs.num)
 }
