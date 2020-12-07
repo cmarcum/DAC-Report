@@ -83,6 +83,11 @@ get.latest.approved.dar.date <- function() {
   return(cur.table.latest)
 }
 
+get.all.unique.studies.ids <- function() {
+  df <- get.nih.dac.action.table()
+  return(unique(df['Study accesion'])$`Study accesion`)
+}
+
 # Min max normalize the gievn vector
 min_max_norm <- function(x) {
   (x - min(x)) / (max(x) - min(x))

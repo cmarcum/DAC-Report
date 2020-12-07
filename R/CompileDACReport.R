@@ -37,6 +37,8 @@ compile.dac.report <- function(dac, author, start.date, end.date,...) {
 
   print('Computing Study Summary Table...')
   study.summary.table <- get.study.summary.table(start.date,end.date)
+  google.scholar.citation.table <- get.google.scholar.citation.table()
+  study.summary.table <- merge(study.summary.table,google.scholar.citation.table,by.x = 'StudyAccesion',by.y = 'phs_id',all.x = TRUE)
 
   print("Computing Top Study Term Frequency Table...")
   dac.study.summary.table <- study.summary.table[study.summary.table['DAC'] == dac,]

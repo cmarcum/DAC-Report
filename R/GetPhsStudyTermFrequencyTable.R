@@ -15,33 +15,37 @@
 #' }
 #'
 get.phs.study.term.frequency.table <- function(phs.id) {
-  raw.text <- request.phs.research.statements(phs.id)$`Technical Research Use Statement`
-  docs <- tm::Corpus(tm::VectorSource(raw.text))
-  to.space <- tm::content_transformer(function (x, pattern) gsub(pattern, " ", x))
+  table.requested <- request.phs.research.statements(phs.id)
+  if (!is.na(table.requested)) {
+    raw.text <- request.phs.research.statements(phs.id)$`Technical Research Use Statement`
+    docs <- tm::Corpus(tm::VectorSource(raw.text))
+    to.space <- tm::content_transformer(function (x, pattern) gsub(pattern, " ", x))
 
-  docs <- tm::tm_map(docs, to.space, "/")
-  docs <- tm::tm_map(docs, to.space, "@")
-  docs <- tm::tm_map(docs, to.space, "\\|")
+    docs <- tm::tm_map(docs, to.space, "/")
+    docs <- tm::tm_map(docs, to.space, "@")
+    docs <- tm::tm_map(docs, to.space, "\\|")
 
-  # Convert the text to lower case
-  docs <- tm::tm_map(docs, tm::content_transformer(tolower))
-  # Remove numbers
-  docs <- tm::tm_map(docs, tm::removeNumbers)
-  # Remove english common stopwords
-  docs <- tm::tm_map(docs, tm::removeWords, tm::stopwords("english"))
+    # Convert the text to lower case
+    docs <- tm::tm_map(docs, tm::content_transformer(tolower))
+    # Remove numbers
+    docs <- tm::tm_map(docs, tm::removeNumbers)
+    # Remove english common stopwords
+    docs <- tm::tm_map(docs, tm::removeWords, tm::stopwords("english"))
 
-  custom.stop.words <- c("data","will","phs","study","use","can","dataset","also","use","used","using","datasets")
-  docs <- tm::tm_map(docs, tm::removeWords, custom.stop.words)
+    custom.stop.words <- c("data","will","phs","study","use","can","dataset","also","use","used","using","datasets")
+    docs <- tm::tm_map(docs, tm::removeWords, custom.stop.words)
 
-  # Remove punctuations
-  docs <- tm::tm_map(docs, tm::removePunctuation)
-  # Eliminate extra white spaces
-  docs <- tm::tm_map(docs, tm::stripWhitespace)
+    # Remove punctuations
+    docs <- tm::tm_map(docs, tm::removePunctuation)
+    # Eliminate extra white spaces
+    docs <- tm::tm_map(docs, tm::stripWhitespace)
 
-  dtm <- tm::TermDocumentMatrix(docs)
-  m <- as.matrix(dtm)
-  v <- sort(rowSums(m),decreasing=TRUE)
-  d <- data.frame(word = names(v),freq=v)
+    dtm <- tm::TermDocumentMatrix(docs)
+    m <- as.matrix(dtm)
+    v <- sort(rowSums(m),decreasing=TRUE)
+    d <- data.frame(word = names(v),freq=v)
 
-  return(d)
+    return(d)
+  }
+  return(NA)
 }

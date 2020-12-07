@@ -210,7 +210,7 @@ During this reporting period, `r new.studies.released` new studies were released
 
 ```{r include=FALSE}
 study.released.fig.cap <- sprintf("Number of Study Released by %s Per Month Since 2015", dac)
-word.cloud.fig.cap <- sprintf("Word cloud of Study %s (%s)",phs.popular.this.dac,phs.popular.this.dac.study.name)
+word.cloud.fig.cap <- sprintf("Word cloud of Research Statements for Study %s (%s)",phs.popular.this.dac,phs.popular.this.dac.study.name)
 ```
 
 ```{r fig.cap=word.cloud.fig.cap, echo=FALSE, warning=FALSE ,message=FALSE}
@@ -219,6 +219,64 @@ library(RColorBrewer)
 if (!is.na(top.study.term.freq.table)) {
   wordcloud(words = top.study.term.freq.table$word, freq = top.study.term.freq.table$freq, min.freq = 1, max.words=200,
             random.order=FALSE, rot.per=0.1, colors=RColorBrewer::brewer.pal(8, "Dark2"))
+}
+```
+
+```{r include=FALSE}
+library(knitr)
+dac.study.summary.table.ordered.by.citation <- dac.study.summary.table[order(-(dac.study.summary.table$gs_citation_count)),]
+if (nrow(dac.study.summary.table.ordered.by.citation) > 0) {
+  total.citations <- sum(dac.study.summary.table.ordered.by.citation$`gs_citation_count`, na.rm=TRUE)
+  most.cited.study <- dac.study.summary.table.ordered.by.citation[1,]
+  most.cited.study.id <- most.cited.study$`StudyAccesion`
+  most.cited.study.name <- most.cited.study$`Study Name`
+  most.cited.study.count <- most.cited.study$`gs_citation_count`
+} else {
+  total.citations <- 0
+  most.cited.study.id <- NA
+  most.cited.study.name <- NA
+  most.cited.study.count <- NA
+}
+
+```
+
+According to Google Scholar, the most cited study during this time period is `r most.cited.study.id` (`r most.cited.study.name`) with `r most.cited.study.count` citations.
+
+```{r include=FALSE}
+most.cited.fig.cap <- sprintf("Top 5 Studies Managed by %s with Most Google Scholar Citations Between %s and %s", dac,params$start.date,params$end.date)
+```
+
+
+```{r fig.cap=most.cited.fig.cap, echo=FALSE}
+if (nrow(dac.study.summary.table.ordered.by.citation) > 5) {
+  most.cited.studies <- dac.study.summary.table.ordered.by.citation[1:5,]
+  citation.count <- as.vector(most.cited.studies$`gs_citation_count`)
+  study.ids <-  as.vector(most.cited.studies$`StudyAccesion`)
+  labels <- as.vector(most.cited.studies$`Study Name`)
+  other.total <- total.citations - sum(citation.count)
+  if (other.total > 0) {
+      citation.count <- c(citation.count,other.total)
+      labels <- c(labels,"others")
+      study.ids <- c(study.ids,"others")
+  }
+  
+  cited.df <- data.frame(StudyID = study.ids, 
+                         StudyName = labels,
+                         Citations = citation.count
+                         )
+  
+  cited.df <- cited.df[order(cited.df$Citations,decreasing = TRUE),]
+  cited.df$StudyID <- factor(cited.df$StudyID,
+                                       levels=unique(as.character(cited.df$StudyID)))
+  ggplot(cited.df, aes(x = StudyID, y = Citations, fill=StudyName)) +
+    geom_bar(stat="identity") +
+    geom_text(aes(label=Citations), vjust=-0.3, size=3.5) +
+    theme(legend.position = "bottom",
+          # axis.text.x = element_text(angle = 15, vjust = 0.5, hjust=1)
+          ) +
+    scale_x_discrete(guide = guide_axis(n.dodge=2)) +
+    guides(fill = guide_legend(nrow = 6,title.position="top", title.hjust = 0.5))
+  
 }
 ```
 
@@ -297,6 +355,12 @@ study.status.table.dac.plot <- study.status.table.dac.plot + geom_rect(data=rect
 study.status.table.dac.plot
 ```
 
+# Supplemental Information
+
+```{r echo=FALSE}
+library(knitr)
+#knitr::kable(timeline.summary.table)
+```
 
 
 ---
