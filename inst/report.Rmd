@@ -55,9 +55,9 @@ The `r dac` Data Access Committee (DAC) currently manages `r dac.total.dars` dat
 
 # Data Access Requests
 
-Between `r params$start.date` and `r params$end.date` `r dac` reviewed `r num.dars.in.window` DARs. Of these, `r number.of.accepted` were accepted, `r number.of.downloaded` were downloaded, `r number.of.prev.download` have previous version downloaded and `r number.of.rejected` were rejected.   The average amount of time from when the Principle Investigator (PI) submited a DAR to the final decision by the DAC was `r round(avg.final,1)` days.  The average time to an accepted decision was `r round(avg.accept,1)` days, while the average time to a rejected decision was `r round(avg.reject,1)` days.  Figure \@ref(fig:compline) is a barplot comparing the `r dac` DAC to time to final decision to the average across all NIH DACs during the same time interval.  
+Between `r params$start.date` and `r params$end.date` `r dac` reviewed `r num.dars.in.window` DARs. Of these, `r number.of.accepted` were accepted, `r number.of.downloaded` were downloaded, `r number.of.prev.download` had a previous version downloaded, and `r number.of.rejected` were rejected.   The average amount of time from when the Principle Investigator (PI) submited a DAR to the final decision by the DAC was `r round(avg.final,1)` days.  The average time to an accepted decision was `r round(avg.accept,1)` days, while the average time to a rejected decision was `r round(avg.reject,1)` days.  Figure \@ref(fig:compline) is a barplot comparing the `r dac` DAC to time to final decision to the average across all NIH DACs during the same time interval.  
 
-```{r compline, fig.cap="Comparison of DAR Processing Time among all DACs", echo=FALSE, warning=FALSE ,message=FALSE}
+```{r compline, fig.cap="Comparison of DAR Processing Time among all DACs", echo=FALSE, warning=FALSE ,message=FALSE, fig.align="center"}
 timeline.summary.table <- timeline.summary.table %>% dplyr::mutate(ToHighlight = ifelse( DAC == params$dac, "yes", "no" ))
 timeline.summary.table$AvgApprovalTime <- as.numeric(timeline.summary.table$AvgApprovalTime)
 timeline.summary.table<- timeline.summary.table[order(timeline.summary.table$AvgApprovalTime, decreasing=TRUE),]
@@ -77,7 +77,7 @@ dar.access.fig.cap <- sprintf("Data Access Requests Submitted to %s Per Month Si
 ```
 
 
-```{r fig.cap=dar.access.fig.cap, echo=FALSE, warning=FALSE ,message=FALSE}
+```{r fig.cap=dar.access.fig.cap, echo=FALSE, warning=FALSE ,message=FALSE, fig.align="center"}
 dar.request.growth.plot <- ggplot(study.status.table.dac, aes(x=Month,y=TotalRequests)) +
   geom_line(size=2, color="cornflowerblue") +
   xlab("Year") +
@@ -89,7 +89,7 @@ dar.request.growth.plot
 ```
 
 
-```{r fig.cap="DAR Processing Time: From PI Submission to SO Approval", echo=FALSE, warning=FALSE ,message=FALSE}
+```{r fig.cap="DAR Processing Time: From PI Submission to SO Approval", echo=FALSE, warning=FALSE ,message=FALSE, fig.align="center"}
 # calculates the highest whisker for all boxplots
 approval.time.top.ylims <- stats::aggregate(approval.time.diff.table["ApprovalTimeFromPIToSO"],
                                            by=list(Month=approval.time.diff.table$ApprovedMonth),
@@ -113,7 +113,7 @@ approval.time.from.PI.to.SO.plot <- ggplot(approval.time.diff.table, aes(factor(
 approval.time.from.PI.to.SO.plot
 ```
 
-```{r fig.cap="DAR Processing Time: From SO Approval to DAC Approval", echo=FALSE, warning=FALSE ,message=FALSE}
+```{r fig.cap="DAR Processing Time: From SO Approval to DAC Approval", echo=FALSE, warning=FALSE ,message=FALSE, fig.align="center"}
 approval.time.top.ylims <- stats::aggregate(approval.time.diff.table["ApprovalTimeFromSOToDAC"],
                                            by=list(Month=approval.time.diff.table$ApprovedMonth),
                                            FUN = function(x){ boxplot.stats(as.numeric(x))$stats[5] }
@@ -134,7 +134,7 @@ approval.time.from.SO.to.DAC.plot <- ggplot(approval.time.diff.table, aes(factor
 approval.time.from.SO.to.DAC.plot
 ```
 
-```{r fig.cap="DAR Processing Time: From PI Submission to DAC Approval", echo=FALSE, warning=FALSE ,message=FALSE}
+```{r fig.cap="DAR Processing Time: From PI Submission to DAC Approval", echo=FALSE, warning=FALSE ,message=FALSE, fig.align="center"}
 approval.time.top.ylims <- stats::aggregate(approval.time.diff.table["ApprovalTimeFromPIToDAC"],
                                            by=list(Month=approval.time.diff.table$ApprovedMonth),
                                            FUN = function(x){ boxplot.stats(as.numeric(x))$stats[5] }
@@ -172,11 +172,10 @@ current.dac.pi.average.dac <- round(mean(current.dac.pi.table$DAC),2)
 current.dac.pi.average.project <- round(mean(current.dac.pi.table$Project),2)
 ```
 
-Between `r start.date` and `r end.date`, `r length(pi.submitted.to.current.dac.selected.time)` PIs have submitted DAR to studies released by `r dac`. Among these PIs, `r current.dac.pi.submit.to.more.than.one.dac` have also submitted DAR to studies released by other DACs. PI who submitted DAR to `r dac` 
-on average submits `r current.dac.pi.average.dar` DAR to all DACs for `r current.dac.pi.average.project` projects.
+Between `r start.date` and `r end.date`, `r length(pi.submitted.to.current.dac.selected.time)` PIs have submitted DAR to studies released by `r dac`. Among these PIs, `r current.dac.pi.submit.to.more.than.one.dac` have also submitted DAR to studies released by other DACs. PIs who submitted DARs to `r dac` also
+submits, on average, `r current.dac.pi.average.dar` DARs to all DACs for `r current.dac.pi.average.project` projects.
 
 # Study Released
-
 
 ```{r include=FALSE}
 # study.summary.table.ordered <- study.summary.table[order(-study.summary.table$TotalRequest),]
@@ -206,14 +205,14 @@ if (nrow(dac.study.summary.table.ordered) == 0) {
 
 ```
 
-During this reporting period, `r new.studies.released` new studies were released by `r dac` and a total of `r new.studies.dar` DARs were made for these studies. Study `r phs.popular.this.dac` (`r phs.popular.this.dac.study.name`) has been the most requested dataset from the `r dac` DAC with `r phs.popular.this.dac.total.request` requests.
+During this reporting period, `r new.studies.released` new studies were released by `r dac` through dbGaP.  A total of `r new.studies.dar` DARs were made for these newly released studies. Study `r phs.popular.this.dac` (`r phs.popular.this.dac.study.name`) was the most requested dataset from the `r dac` DAC with `r phs.popular.this.dac.total.request` requests.  The following word-cloud provides a graphical summary of the combined research use statements (RUS) from all DARs requesting this study. The larger the word appears in the wordcloud, the more frequent the word in the set of RUS.
 
 ```{r include=FALSE}
 study.released.fig.cap <- sprintf("Number of Study Released by %s Per Month Since 2015", dac)
 word.cloud.fig.cap <- sprintf("Word cloud of Research Statements for Study %s (%s)",phs.popular.this.dac,phs.popular.this.dac.study.name)
 ```
 
-```{r fig.cap=word.cloud.fig.cap, echo=FALSE, warning=FALSE ,message=FALSE}
+```{r fig.cap=word.cloud.fig.cap, echo=FALSE, warning=FALSE ,message=FALSE, fig.align="center"}
 library(wordcloud)
 library(RColorBrewer)
 if (!is.na(top.study.term.freq.table)) {
@@ -281,7 +280,7 @@ if (nrow(dac.study.summary.table.ordered.by.citation) > 5) {
 ```
 
 
-```{r fig.cap=study.released.fig.cap, echo=FALSE, warning=FALSE ,message=FALSE}
+```{r fig.cap=study.released.fig.cap, echo=FALSE, warning=FALSE ,message=FALSE, fig.align="center"}
 study.released.growth.plot <- ggplot(study.status.table.dac, aes(x=Month,y=StudiesReleased)) +
   geom_line(size=2, color="cornflowerblue") +
   xlab("Year") +
@@ -300,7 +299,7 @@ dual.y.fig.caption <- sprintf("Comparison of Cummulative Requests Received and S
 ```
 
 
-```{r fig.cap=dual.y.fig.caption, echo=FALSE, warning=FALSE, message=FALSE}
+```{r fig.cap=dual.y.fig.caption, echo=FALSE, warning=FALSE, message=FALSE, fig.align="center"}
 # A few constants
 coeff <- 100
 coeff <- max(study.status.table.dac$TotalRequestsCummulative)/max(study.status.table.dac$StudiesReleasedCummulative)
@@ -336,7 +335,7 @@ comparison.plot
 growth.compare.caption <- sprintf("Comparison of DAR Growth and Studies Released Growth for %s",dac)
 ```
 
-```{r fig.cap=growth.compare.caption, echo=FALSE, warning=FALSE, message=FALSE}
+```{r fig.cap=growth.compare.caption, echo=FALSE, warning=FALSE, message=FALSE, fig.align="center"}
 study.status.table.dac.plot <- ggplot(study.status.table.dac, aes(x=Month)) +
   geom_line(aes(y=TotalRequestsGrowth, colour="Total Requests Growth"), size=2) +
   geom_line(aes(y=StudiesReleasedGrowth, colour="Studies Released Growth"), size=2) +
