@@ -249,7 +249,6 @@ if (!is.na(top.study.term.freq.table)) {
 ```
 
 ```{r include=FALSE}
-library(knitr)
 dac.study.summary.table.ordered.by.citation <- dac.study.summary.table[order(-(dac.study.summary.table$gs_citation_count)),]
 if (nrow(dac.study.summary.table.ordered.by.citation) > 0) {
   total.citations <- sum(dac.study.summary.table.ordered.by.citation$`gs_citation_count`, na.rm=TRUE)

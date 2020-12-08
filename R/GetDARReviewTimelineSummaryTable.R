@@ -19,7 +19,7 @@
 #' @return dataframe
 #'
 #' @examples \dontrun{
-#' > dar.review.timeline.summary("2020-01-01","2020-10-15")
+#' > get.dar.review.timeline.summary.table("2020-01-01","2020-10-15")
 # DAC TotalApproved AvgApprovalTime MedApprovalTime TotalRejected ...
 # 1            CDAC           212  13.339377 days  10.846528 days ...
 # 2          ES DAC            69  12.886101 days  11.211111 days ...
@@ -29,7 +29,7 @@
 #' }
 #'
 #' @export
-dar.review.timeline.summary <- function(start.date,end.date,df=get.nih.dac.action.table()) {
+get.dar.review.timeline.summary.table <- function(start.date,end.date,df=get.nih.dac.action.table()) {
 
   submitted.df <- get.df.within.range(df,start.date,end.date,date.col="Submitted by PI")
   submitted.df["time_from_PI_submission_to_DAC_approval"] <- difftime(to.time(submitted.df[,"Approved by DAC"]), to.time(submitted.df[,"Submitted by PI"]),units = "days")

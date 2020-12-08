@@ -1,3 +1,6 @@
+# The phs studies table is currently unused so the below functions are not exposed
+# This may change in future updates
+
 # Given phs.id, returns dataframe containingi information about request access and PI
 request.phs.study.info <- function(phs.id) {
   study.key <- request.study.key(phs.id)
@@ -138,7 +141,6 @@ request.phs.study.focus <- function(phs.id) {
   }
 }
 
-
 # Retrieves the json of the first study result of dbgap advanced search
 request.phs.advanced.search.result.json <- function(phs.id) {
   base.url <- "https://www.ncbi.nlm.nih.gov/gap/advanced_search/search/"
@@ -172,7 +174,7 @@ request.phs.research.statements <- function(phs.id,as.text=FALSE) {
     return(res.content)
   }
 
-  content.table <- read.delim2(text=res.content, sep = '\t',header=FALSE)
+  content.table <- utils::read.delim2(text=res.content, sep = '\t',header=FALSE)
 
   emptycols <- sapply(content.table, function (k) all(is.na(k)))
   content.table <- content.table[!emptycols]
@@ -191,48 +193,4 @@ request.phs.research.statements <- function(phs.id,as.text=FALSE) {
   return(content.table)
 }
 
-# Returns google scholar result count
-request.google.scholar.result.count <- function(term,start.year='',end.year='') {
-  base.url <- 'https://scholar.google.com/scholar?q=%s&as_ylo=%s&as_yhi=%s'
-  request.url <- sprintf(base.url,term,start.year,end.year)
-  res <- httr::GET(request.url)
-  res.content <- httr::content(res)
-  res.ele <- rvest::html_node(res.content, css="#gs_ab_md > .gs_ab_mdw")
-  res.ele.txt <- rvest::html_text(res.ele)
-  if (is.na(res.ele.txt) || res.ele.txt == "") {
-    return(0)
-  } else {
-    res.count <- as.numeric(regmatches(res.ele.txt,regexpr('\\d+',res.ele.txt)))
-    return(res.count)
-  }
-}
 
-
-
-# Given list of phs id, create dataframe with their corresponding number
-# of search results on google scholar
-# Empirically, setting the wait time >= 2 prevents captcha from showing up
-request.google.scholar.citation.table <- function(phs.id.list,wait.for=2){
-  citation.list <- list()
-  for (i in 1:length(phs.id.list)) {
-    phs.id.no.version <- extract.phs(phs.id.list[[i]])
-    print(sprintf("Retrieving Google Scholar Citation Data for %s",phs.id.no.version))
-    citation.list[[i]] <- request.google.scholar.result.count(phs.id.no.version)
-    Sys.sleep(wait.for)
-  }
-  d <- data.frame(I(phs.id.list), I(citation.list))
-  d$citation.list <- as.numeric(d$citation.list)
-  names(d) <- c('phs_id','gs_citation_count')
-  d$`last_update` <- Sys.Date()
-  return(d)
-}
-
-# Returns the google scholar citation table
-get.google.scholar.citation.table <- function() {
-  load(system.file("gs_citation_table.rda", package = "DACReportingTool"))
-  if(!exists("gs_citation_table")) {
-    stop("gs_citation_table variable not found. Was the locally file renamed and overwritten?
-         To obtain a fresh copy use refresh.local.data()")
-  }
-  return(gs_citation_table)
-}

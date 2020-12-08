@@ -12,7 +12,9 @@
 #' in which the analysis will be based on
 #' @param end.date String, date in "yyyy-mm-dd" format, the end date of the timeframe in
 #' which the analysis will be based on
+#' @param doc.type String, defaults to be "docx", use "html" to create an interactie html report instead
 #' @param ... extra arguments to be provided to rmarkdown::render
+#'
 #'
 #' @return NULL
 #'
@@ -33,7 +35,7 @@ compile.dac.report <- function(dac, author, start.date, end.date,doc.type="docx"
   dac.specific.action.table <- nih_dac_action_table[nih_dac_action_table["DAC"] == dac,]
 
   print('Computing Review Timelime Summary Table...')
-  timeline.summary.table <- dar.review.timeline.summary(start.date,end.date)
+  timeline.summary.table <- get.dar.review.timeline.summary.table(start.date,end.date)
 
   print('Computing Study Summary Table...')
   study.summary.table <- get.study.summary.table(start.date,end.date)

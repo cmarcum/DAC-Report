@@ -12,9 +12,8 @@ refresh.local.data(start.date = as.Date("2000-01-01"), end.date = Sys.Date())
 \item{end.date}{the latest date to get data from. Default to be the system date}
 }
 \description{
-In case of data corruption, request all data and overwrite the existing locally
-stored data. If error arises or the request takes too long, try picking a smaller
-timeframe then use dac.data.update.all()
+Request all data and overwrite the existing locally
+stored data. May take 1-2 hours
 }
 \examples{
 \dontrun{

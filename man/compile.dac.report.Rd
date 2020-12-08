@@ -4,7 +4,7 @@
 \alias{compile.dac.report}
 \title{Compile DAC Report}
 \usage{
-compile.dac.report(dac, author, start.date, end.date, ...)
+compile.dac.report(dac, author, start.date, end.date, doc.type = "docx", ...)
 }
 \arguments{
 \item{dac}{String, the name of the DAC from which the report will be generated for, one of
@@ -17,6 +17,8 @@ in which the analysis will be based on}
 
 \item{end.date}{String, date in "yyyy-mm-dd" format, the end date of the timeframe in
 which the analysis will be based on}
+
+\item{doc.type}{String, defaults to be "docx", use "html" to create an interactie html report instead}
 
 \item{...}{extra arguments to be provided to rmarkdown::render}
 }
