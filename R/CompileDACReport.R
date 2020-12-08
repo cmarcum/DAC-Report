@@ -21,7 +21,7 @@
 #' }
 #'
 #' @export
-compile.dac.report <- function(dac, author, start.date, end.date,...) {
+compile.dac.report <- function(dac, author, start.date, end.date,doc.type="docx",...) {
   all_nih_dac_studies_table <- get.all.nih.dac.studies.table()
   nih_dac_action_table <- get.nih.dac.action.table()
   # Markdown template to use
@@ -67,23 +67,38 @@ compile.dac.report <- function(dac, author, start.date, end.date,...) {
 
   print('All tables calculated. Rendering...')
 
-  rmarkdown::render(this.file, params = list(
-  title = title,
-  start.date = start.date,
-  end.date = end.date,
-  author = author,
-  dac=dac,
-  nih.dac.action.table=nih_dac_action_table,
-  timeline.summary.table=timeline.summary.table,
-  study.summary.table=study.summary.table,
-  top.study.term.freq.table=top.study.term.freq.table,
-  study.status.table.all=study.status.table.all,
-  study.status.table.dac=study.status.table.dac,
-  pi.requests.table.overall=pi.requests.table.overall,
-  pi.requests.table.selected.time=pi.requests.table.selected.time,
-  approval.time.diff.table=approval.time.diff.table
-   ),...)
+  doc.params <- list(
+    title = title,
+    start.date = start.date,
+    end.date = end.date,
+    author = author,
+    dac=dac,
+    nih.dac.action.table=nih_dac_action_table,
+    timeline.summary.table=timeline.summary.table,
+    study.summary.table=study.summary.table,
+    top.study.term.freq.table=top.study.term.freq.table,
+    study.status.table.all=study.status.table.all,
+    study.status.table.dac=study.status.table.dac,
+    pi.requests.table.overall=pi.requests.table.overall,
+    pi.requests.table.selected.time=pi.requests.table.selected.time,
+    approval.time.diff.table=approval.time.diff.table,
+    doc.type=doc.type
+  )
 
-  shell.exec(system.file("report.docx", package="DACReportingTool"))
+  if (doc.type == "html") {
+    rmarkdown::render(this.file,
+                      params = doc.params,
+                      output_format = rmarkdown::html_document(),
+                      ...)
+    shell.exec(system.file("report.html", package="DACReportingTool"))
+  }
+
+  if (doc.type == "docx") {
+    rmarkdown::render(this.file,
+                      params = doc.params,
+                      output_format = bookdown::word_document2(),
+                      ...)
+    shell.exec(system.file("report.docx", package="DACReportingTool"))
+  }
 
 }
