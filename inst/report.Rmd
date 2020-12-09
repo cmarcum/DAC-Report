@@ -1,6 +1,6 @@
 ---
-output: 
- bookdown::word_document2: default
+# output:
+#  bookdown::word_document2: default
 params:
   title: "title"
   author: "author"
@@ -10,11 +10,13 @@ params:
   nih.dac.action.table: "nih_dac_action_table"
   timeline.summary.table: "timeline.summary.table"
   study.summary.table: "study.summary.table"
+  top.study.term.freq.table: "top.study.term.freq.table"
   study.status.table.all: "study.status.table.all"
   study.status.table.dac: "study.status.table.dac"
   pi.requests.table.overall: "pi.requests.table.overall"
   pi.requests.table.selected.time: "pi.requests.table.selected.time"
   approval.time.diff.table: "approval.time.diff.table"
+  doc.type: "docx"
 --- 
 
 ---
@@ -26,7 +28,7 @@ date: `r format(Sys.time(), '%d %B, %Y')`
 ```{r, include=FALSE}
 # Loads variables to be reported
 library(ggplot2)
-
+library(plotly)
 # util function
 get.df.within.range <- function(df,start.date,end.date,date.col="Approved by DAC") {
   return(subset(df, as.Date(df[,date.col], format="%m/%d/%Y") >= start.date & as.Date(df[,date.col], format="%m/%d/%Y") <= end.date))
@@ -54,9 +56,9 @@ The `r dac` Data Access Committee (DAC) currently manages `r dac.total.dars` dat
 
 # Data Access Requests
 
-Between `r params$start.date` and `r params$end.date` `r dac` reviewed `r num.dars.in.window` DARs. Of these, `r number.of.accepted` were accepted, `r number.of.downloaded` were downloaded, `r number.of.prev.download` have previous version downloaded and `r number.of.rejected` were rejected.   The average amount of time from when the Principle Investigator (PI) submited a DAR to the final decision by the DAC was `r round(avg.final,1)` days.  The average time to an accepted decision was `r round(avg.accept,1)` days, while the average time to a rejected decision was `r round(avg.reject,1)` days.  Figure \@ref(fig:compline) is a barplot comparing the `r dac` DAC to time to final decision to the average across all NIH DACs during the same time interval.  
+Between `r params$start.date` and `r params$end.date` `r dac` reviewed `r num.dars.in.window` DARs. Of these, `r number.of.accepted` were accepted, `r number.of.downloaded` were downloaded, `r number.of.prev.download` had a previous version downloaded, and `r number.of.rejected` were rejected.   The average amount of time from when the Principle Investigator (PI) submited a DAR to the final decision by the DAC was `r round(avg.final,1)` days.  The average time to an accepted decision was `r round(avg.accept,1)` days, while the average time to a rejected decision was `r round(avg.reject,1)` days.  Figure \@ref(fig:compline) is a barplot comparing the `r dac` DAC to time to final decision to the average across all NIH DACs during the same time interval.  
 
-```{r compline, fig.cap="Comparison of DAR Processing Time among all DACs", echo=FALSE, warning=FALSE ,message=FALSE}
+```{r compline, fig.cap="Comparison of DAR Processing Time among all DACs", echo=FALSE, warning=FALSE ,message=FALSE, fig.align="center"}
 timeline.summary.table <- timeline.summary.table %>% dplyr::mutate(ToHighlight = ifelse( DAC == params$dac, "yes", "no" ))
 timeline.summary.table$AvgApprovalTime <- as.numeric(timeline.summary.table$AvgApprovalTime)
 timeline.summary.table<- timeline.summary.table[order(timeline.summary.table$AvgApprovalTime, decreasing=TRUE),]
@@ -64,11 +66,16 @@ timeline.summary.table$DAC <- factor(timeline.summary.table$DAC, levels=unique(a
 p <- ggplot(data=timeline.summary.table, aes(x=DAC, y=AvgApprovalTime, fill = ToHighlight)) +
   geom_bar(stat="identity") +
   # geom_text(aes(label=paste(round(AvgApprovalTime,1),'days'))) +
-  scale_y_continuous(breaks = seq(0, max(timeline.summary.table$AvgApprovalTime, na.rm = TRUE), by = 7)) +
+  scale_y_continuous(breaks= seq(0, max(timeline.summary.table$AvgApprovalTime, na.rm = TRUE), by = 7)) +
   scale_fill_manual(values = c("yes"="cornflowerblue","no"="gray"), guide = FALSE) +
   coord_flip() +
   ylab("Average Processing Time (days)")
-p
+if (params$doc.type == "html") {
+  ggplotly(p)
+}
+if (params$doc.type == "docx") {
+  p
+}
 ```
 
 ```{r include=FALSE}
@@ -76,7 +83,7 @@ dar.access.fig.cap <- sprintf("Data Access Requests Submitted to %s Per Month Si
 ```
 
 
-```{r fig.cap=dar.access.fig.cap, echo=FALSE, warning=FALSE ,message=FALSE}
+```{r fig.cap=dar.access.fig.cap, echo=FALSE, warning=FALSE ,message=FALSE, fig.align="center"}
 dar.request.growth.plot <- ggplot(study.status.table.dac, aes(x=Month,y=TotalRequests)) +
   geom_line(size=2, color="cornflowerblue") +
   xlab("Year") +
@@ -84,48 +91,80 @@ dar.request.growth.plot <- ggplot(study.status.table.dac, aes(x=Month,y=TotalReq
 rect <- data.frame(xmin=as.Date(lubridate::floor_date(as.Date(params$start.date))), xmax=as.Date(lubridate::floor_date(as.Date(params$end.date))), ymin=0, ymax=Inf)
 dar.request.growth.plot <- dar.request.growth.plot + geom_rect(data=rect, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax),
               color="transparent", fill="orange", alpha=0.3, inherit.aes = FALSE)
-dar.request.growth.plot
+if (params$doc.type == "html") {
+  ggplotly(dar.request.growth.plot)
+}
+if (params$doc.type == "docx") {
+  dar.request.growth.plot
+}
 ```
 
 
-```{r fig.cap="DAR Processing Time: From PI Submission to SO Approval", echo=FALSE, warning=FALSE ,message=FALSE}
+```{r fig.cap="DAR Processing Time: From PI Submission to SO Approval", echo=FALSE, warning=FALSE ,message=FALSE, fig.align="center"}
+# calculates the highest whisker for all boxplots
+approval.time.top.ylims <- stats::aggregate(approval.time.diff.table["ApprovalTimeFromPIToSO"],
+                                           by=list(Month=approval.time.diff.table$ApprovedMonth),
+                                           FUN = function(x){ boxplot.stats(as.numeric(x))$stats[5] }
+                                           )
+# Take the max one and use it as ylim
+ylim1 <- c(0,max(approval.time.top.ylims$ApprovalTimeFromPIToSO))
+#ylim1 <- boxplot.stats(as.numeric(approval.time.diff.table$ApprovalTimeFromPIToSO))$stats[c(1, 5)]
 
-ylim1 <- boxplot.stats(as.numeric(approval.time.diff.table$ApprovalTimeFromPIToSO))$stats[c(1, 5)]
 
 approval.time.from.PI.to.SO.plot <- ggplot(approval.time.diff.table, aes(factor(ApprovedMonth), ApprovalTimeFromPIToSO)) +
-  geom_boxplot() + 
-  # coord_cartesian(ylim = ylim1*1.05) +
+  geom_boxplot(outlier.shape = NA) + 
+  coord_cartesian(ylim = ylim1*1.05) +
   scale_y_continuous(n.breaks = 8) +
   stat_summary(fun=median, colour="cornflowerblue", aes(y=ApprovalTimeFromPIToSO,group=1),
                geom="line", group=1, size=2) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
   xlab("Month") +
   ylab("Time (Days)")
-  
-approval.time.from.PI.to.SO.plot
+
+if (params$doc.type == "html") {
+  ggplotly(approval.time.from.PI.to.SO.plot)
+}
+if (params$doc.type == "docx") {
+  approval.time.from.PI.to.SO.plot
+}
 ```
 
-```{r fig.cap="DAR Processing Time: From SO Approval to DAC Approval", echo=FALSE, warning=FALSE ,message=FALSE}
-ylim2 <- boxplot.stats(as.numeric(approval.time.diff.table$ApprovalTimeFromSOToDAC))$stats[c(1, 5)]
+```{r fig.cap="DAR Processing Time: From SO Approval to DAC Approval", echo=FALSE, warning=FALSE ,message=FALSE, fig.align="center"}
+approval.time.top.ylims <- stats::aggregate(approval.time.diff.table["ApprovalTimeFromSOToDAC"],
+                                           by=list(Month=approval.time.diff.table$ApprovedMonth),
+                                           FUN = function(x){ boxplot.stats(as.numeric(x))$stats[5] }
+                                           )
+
+ylim2 <- c(0,max(approval.time.top.ylims$ApprovalTimeFromSOToDAC))
 
 approval.time.from.SO.to.DAC.plot <- ggplot(approval.time.diff.table, aes(factor(ApprovedMonth), ApprovalTimeFromSOToDAC)) +
-  geom_boxplot() + 
-  # coord_cartesian(ylim = ylim2*1.05) +
+  geom_boxplot(outlier.shape = NA) + 
+  coord_cartesian(ylim = ylim2*1.05) +
   scale_y_continuous(n.breaks = 8) +
   stat_summary(fun=median, colour="cornflowerblue", aes(y=ApprovalTimeFromSOToDAC,group=1),
                geom="line", group=1, size=2) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
   xlab("Month") +
   ylab("Time (Days)")
-  
-approval.time.from.SO.to.DAC.plot
+
+if (params$doc.type == "html") {
+  ggplotly(approval.time.from.SO.to.DAC.plot)
+}
+if (params$doc.type == "docx") {
+  approval.time.from.SO.to.DAC.plot
+}
 ```
 
-```{r fig.cap="DAR Processing Time: From PI Submission to DAC Approval", echo=FALSE, warning=FALSE ,message=FALSE}
-ylim3 <- boxplot.stats(as.numeric(approval.time.diff.table$ApprovalTimeFromPIToDAC))$stats[c(1, 5)]
+```{r fig.cap="DAR Processing Time: From PI Submission to DAC Approval", echo=FALSE, warning=FALSE ,message=FALSE, fig.align="center"}
+approval.time.top.ylims <- stats::aggregate(approval.time.diff.table["ApprovalTimeFromPIToDAC"],
+                                           by=list(Month=approval.time.diff.table$ApprovedMonth),
+                                           FUN = function(x){ boxplot.stats(as.numeric(x))$stats[5] }
+                                           )
 
-approval.time.from.PI.to.DAC.plot <- ggplot(approval.time.diff.table, aes(factor(ApprovedMonth), ApprovalTimeFromPIToDAC)) + geom_boxplot() + 
-  # coord_cartesian(ylim = ylim3*1.05) +
+ylim3 <- c(0,max(approval.time.top.ylims$ApprovalTimeFromPIToDAC))
+
+approval.time.from.PI.to.DAC.plot <- ggplot(approval.time.diff.table, aes(factor(ApprovedMonth), ApprovalTimeFromPIToDAC)) + geom_boxplot(outlier.shape = NA) + 
+  coord_cartesian(ylim = ylim3*1.05) +
   # scale_x_discrete(labels = format(as.Date(approval.time.diff.table$ApprovedMonth), "%m/%Y")) +
   scale_y_continuous(n.breaks = 8) +
   stat_summary(fun=median, colour="cornflowerblue", aes(y=ApprovalTimeFromPIToDAC,group=1),
@@ -133,8 +172,14 @@ approval.time.from.PI.to.DAC.plot <- ggplot(approval.time.diff.table, aes(factor
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
   xlab("Month") +
   ylab("Time (Days)")
-  
-approval.time.from.PI.to.DAC.plot
+
+if (params$doc.type == "html") {
+  ggplotly(approval.time.from.PI.to.DAC.plot)
+}
+if (params$doc.type == "docx") {
+  approval.time.from.PI.to.DAC.plot
+}
+
 ```
 
 ```{r echo=FALSE, warning=FALSE ,message=FALSE}
@@ -154,11 +199,10 @@ current.dac.pi.average.dac <- round(mean(current.dac.pi.table$DAC),2)
 current.dac.pi.average.project <- round(mean(current.dac.pi.table$Project),2)
 ```
 
-Between `r start.date` and `r end.date`, `r length(pi.submitted.to.current.dac.selected.time)` PIs have submitted DAR to studies released by `r dac`. Among these PIs, `r current.dac.pi.submit.to.more.than.one.dac` have also submitted DAR to studies released by other DACs. PI who submitted DAR to `r dac` 
-on average submits `r current.dac.pi.average.dar` DAR to all DACs for `r current.dac.pi.average.project` projects.
+Between `r start.date` and `r end.date`, `r length(pi.submitted.to.current.dac.selected.time)` PIs have submitted DAR to studies released by `r dac`. Among these PIs, `r current.dac.pi.submit.to.more.than.one.dac` have also submitted DAR to studies released by other DACs. PIs who submitted DARs to `r dac` also
+submits, on average, `r current.dac.pi.average.dar` DARs to all DACs for `r current.dac.pi.average.project` projects.
 
 # Study Released
-
 
 ```{r include=FALSE}
 # study.summary.table.ordered <- study.summary.table[order(-study.summary.table$TotalRequest),]
@@ -176,26 +220,116 @@ new.studies.released <- nrow(dac.study.summary.table)
 
 new.studies.dar <- sum(dac.study.summary.table$TotalRequest, na.rm = TRUE)
 dac.study.summary.table.ordered <- dac.study.summary.table[order(-dac.study.summary.table$TotalRequest),]
-phs.popular.this.dac <- dac.study.summary.table.ordered[1,]['StudyAccesion']
-phs.popular.this.dac.study.name <- dac.study.summary.table.ordered[1,]['Study Name']
-phs.popular.this.dac.total.request <- dac.study.summary.table.ordered[1,]['TotalRequest']
+if (nrow(dac.study.summary.table.ordered) == 0) {
+  phs.popular.this.dac <- NA
+  phs.popular.this.dac.study.name <- NA
+  phs.popular.this.dac.total.request <- NA
+} else {
+  phs.popular.this.dac <- dac.study.summary.table.ordered[1,]['StudyAccesion']
+  phs.popular.this.dac.study.name <- dac.study.summary.table.ordered[1,]['Study Name']
+  phs.popular.this.dac.total.request <- dac.study.summary.table.ordered[1,]['TotalRequest']
+}
+
 ```
 
-During this reporting period, `r new.studies.released` new studies were released by `r dac` and a total of `r new.studies.dar` DARs were made for these studies. Study `r phs.popular.this.dac` (`r phs.popular.this.dac.study.name`) has been the most requested dataset from the `r dac` DAC with `r phs.popular.this.dac.total.request` requests.
+During this reporting period, `r new.studies.released` new studies were released by `r dac` through dbGaP.  A total of `r new.studies.dar` DARs were made for these newly released studies. Study `r phs.popular.this.dac` (`r phs.popular.this.dac.study.name`) was the most requested dataset from the `r dac` DAC with `r phs.popular.this.dac.total.request` requests.  The following word-cloud provides a graphical summary of the combined research use statements (RUS) from all DARs requesting this study. The larger the word appears in the wordcloud, the more frequent the word in the set of RUS.
 
 ```{r include=FALSE}
 study.released.fig.cap <- sprintf("Number of Study Released by %s Per Month Since 2015", dac)
+word.cloud.fig.cap <- sprintf("Word cloud of Research Statements for Study %s (%s)",phs.popular.this.dac,phs.popular.this.dac.study.name)
+```
+
+```{r fig.cap=word.cloud.fig.cap, echo=FALSE, warning=FALSE ,message=FALSE, fig.align="center"}
+library(wordcloud)
+library(RColorBrewer)
+if (!is.na(top.study.term.freq.table)) {
+  wordcloud(words = top.study.term.freq.table$word, freq = top.study.term.freq.table$freq, min.freq = 1, max.words=200,
+            random.order=FALSE, rot.per=0.1, colors=RColorBrewer::brewer.pal(8, "Dark2"))
+}
+```
+
+```{r include=FALSE}
+dac.study.summary.table.ordered.by.citation <- dac.study.summary.table[order(-(dac.study.summary.table$gs_citation_count)),]
+if (nrow(dac.study.summary.table.ordered.by.citation) > 0) {
+  total.citations <- sum(dac.study.summary.table.ordered.by.citation$`gs_citation_count`, na.rm=TRUE)
+  most.cited.study <- dac.study.summary.table.ordered.by.citation[1,]
+  most.cited.study.id <- most.cited.study$`StudyAccesion`
+  most.cited.study.name <- most.cited.study$`Study Name`
+  most.cited.study.count <- most.cited.study$`gs_citation_count`
+} else {
+  total.citations <- 0
+  most.cited.study.id <- NA
+  most.cited.study.name <- NA
+  most.cited.study.count <- NA
+}
+
+```
+
+According to Google Scholar, the most cited study during this time period is `r most.cited.study.id` (`r most.cited.study.name`) with `r most.cited.study.count` citations.
+
+```{r include=FALSE}
+most.cited.fig.cap <- sprintf("Top 5 Studies Managed by %s with Most Google Scholar Citations Between %s and %s", dac,params$start.date,params$end.date)
+
+if (nrow(dac.study.summary.table.ordered.by.citation) > 5) {
+  most.cited.studies <- dac.study.summary.table.ordered.by.citation[1:5,]
+  citation.count <- as.vector(most.cited.studies$`gs_citation_count`)
+  study.ids <-  as.vector(most.cited.studies$`StudyAccesion`)
+  labels <- as.vector(most.cited.studies$`Study Name`)
+  other.total <- total.citations - sum(citation.count)
+  if (other.total > 0) {
+      citation.count <- c(citation.count,other.total)
+      labels <- c(labels,"others")
+      study.ids <- c(study.ids,"others")
+  }
+  
+  cited.df <- data.frame(StudyID = study.ids, 
+                         StudyName = labels,
+                         Citations = citation.count
+                         )
+  
+  # cited.df <- cited.df[order(cited.df$Citations,decreasing = TRUE),]
+  cited.df$StudyID <- factor(cited.df$StudyID,
+                                       levels=unique(as.character(cited.df$StudyID)))
+}
+```
+
+```{r fig.cap=most.cited.fig.cap, echo=FALSE, fig.align="center"}
+  show.legend <- doc.type=="docx"
+  cited.plot <- ggplot(data=cited.df, aes(x = StudyID, y = Citations, fill = StudyName)) +
+    geom_bar(stat="identity",show.legend = show.legend) +
+    geom_text(aes(label=Citations), vjust=-0.3, size=3.5) +
+    scale_y_continuous(n.breaks = 8) +
+    scale_x_discrete(guide = guide_axis(n.dodge=2)) +
+    xlab("Study IDs") +
+    ylab("Citations")
+
+  if (params$doc.type == "html") {
+    cited.plot <- cited.plot + theme(legend.position='none')
+    ggplotly(cited.plot)
+  }
+  if (params$doc.type == "docx") {
+    cited.plot <- cited.plot +
+      theme(legend.position = "bottom") +
+      guides(fill = guide_legend(nrow = 6,title.position="top", title.hjust = 0.5))
+    cited.plot 
+  }
 ```
 
 
-```{r fig.cap=study.released.fig.cap, echo=FALSE, warning=FALSE ,message=FALSE}
+```{r fig.cap=study.released.fig.cap, echo=FALSE, warning=FALSE ,message=FALSE, fig.align="center"}
 study.released.growth.plot <- ggplot(study.status.table.dac, aes(x=Month,y=StudiesReleased)) +
   geom_line(size=2, color="cornflowerblue") +
   xlab("Year") +
   ylab("Studies Released")
 rect <- data.frame(xmin=as.Date(lubridate::floor_date(as.Date(params$start.date))), xmax=as.Date(lubridate::floor_date(as.Date(params$end.date))), ymin=0, ymax=Inf)
 study.released.growth.plot <- study.released.growth.plot + geom_rect(data=rect, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax),color="transparent", fill="orange", alpha=0.3, inherit.aes = FALSE)
-study.released.growth.plot
+
+if (params$doc.type == "html") {
+  ggplotly(study.released.growth.plot)
+}
+if (params$doc.type == "docx") {
+  study.released.growth.plot
+}
 ```
 
 
@@ -207,7 +341,7 @@ dual.y.fig.caption <- sprintf("Comparison of Cummulative Requests Received and S
 ```
 
 
-```{r fig.cap=dual.y.fig.caption, echo=FALSE, warning=FALSE, message=FALSE}
+```{r fig.cap=dual.y.fig.caption, echo=FALSE, warning=FALSE, message=FALSE, fig.align="center"}
 # A few constants
 coeff <- 100
 coeff <- max(study.status.table.dac$TotalRequestsCummulative)/max(study.status.table.dac$StudiesReleasedCummulative)
@@ -236,14 +370,20 @@ rect3 <- data.frame(xmin=as.Date(lubridate::floor_date(as.Date(params$start.date
 
 comparison.plot <- comparison.plot + geom_rect(data=rect3, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax),color="transparent", fill="orange", alpha=0.3, inherit.aes = FALSE)
 
-comparison.plot
+if (params$doc.type == "html") {
+  ggplotly(comparison.plot)
+}
+if (params$doc.type == "docx") {
+  comparison.plot
+}
+
 ```
 
 ```{r include=FALSE}
 growth.compare.caption <- sprintf("Comparison of DAR Growth and Studies Released Growth for %s",dac)
 ```
 
-```{r fig.cap=growth.compare.caption, echo=FALSE, warning=FALSE, message=FALSE}
+```{r fig.cap=growth.compare.caption, echo=FALSE, warning=FALSE, message=FALSE, fig.align="center"}
 study.status.table.dac.plot <- ggplot(study.status.table.dac, aes(x=Month)) +
   geom_line(aes(y=TotalRequestsGrowth, colour="Total Requests Growth"), size=2) +
   geom_line(aes(y=StudiesReleasedGrowth, colour="Studies Released Growth"), size=2) +
@@ -259,10 +399,14 @@ study.status.table.dac.plot <- ggplot(study.status.table.dac, aes(x=Month)) +
 rect2 <- data.frame(xmin=as.Date(lubridate::floor_date(as.Date(params$start.date))), xmax=as.Date(lubridate::floor_date(as.Date(params$end.date))), ymin=0, ymax=Inf)
 
 study.status.table.dac.plot <- study.status.table.dac.plot + geom_rect(data=rect2, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax),color="transparent", fill="orange", alpha=0.3, inherit.aes = FALSE)
-study.status.table.dac.plot
+
+if (params$doc.type == "html") {
+  ggplotly(study.status.table.dac.plot)
+}
+if (params$doc.type == "docx") {
+  study.status.table.dac.plot
+}
 ```
-
-
 
 ---
 

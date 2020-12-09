@@ -1,3 +1,6 @@
+# The phs studies table is currently unused so the below functions are not exposed
+# This may change in future updates
+
 # Given phs.id, returns dataframe containingi information about request access and PI
 request.phs.study.info <- function(phs.id) {
   study.key <- request.study.key(phs.id)
@@ -131,11 +134,19 @@ update.phs.studies.table <- function(overwrite=TRUE,return.table=FALSE,wait.for=
 }
 
 # Retrieve the main disease focus given the phs number
-request.phs.study.focus <- function(phs_id) {
+request.phs.study.focus <- function(phs.id) {
+  study.json <- request.phs.advanced.search.result.json(phs.id)
+  if (!is.na(study.json)) {
+    return(study.json$study_main_disease_txt)
+  }
+}
+
+# Retrieves the json of the first study result of dbgap advanced search
+request.phs.advanced.search.result.json <- function(phs.id) {
   base.url <- "https://www.ncbi.nlm.nih.gov/gap/advanced_search/search/"
   post.options <- list(
     obj_type = "study",
-    term = phs_id,
+    term = phs.id,
     page_start = 0,
     page_rows = 10,
     facets_applied = list(
@@ -147,8 +158,39 @@ request.phs.study.focus <- function(phs_id) {
   report <- res.content$REPORT
   if (length(report) > 0) {
     study <- report[[1]]
-    study.main.disease <- study$study_main_disease_txt
-    return(study.main.disease)
+    return(study)
   }
   return(NA)
 }
+
+# Retrieve all approved requester and their research use statement given phd id
+request.phs.research.statements <- function(phs.id,as.text=FALSE) {
+  base.url <- "https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/GetAuthorizedRequestDownload.cgi?study_id=%s"
+  request.url  <- sprintf(base.url,phs.id)
+  res <- httr::GET(request.url)
+  res.content <- httr::content(res)
+
+  if (as.text) {
+    return(res.content)
+  }
+
+  content.table <- utils::read.delim2(text=res.content, sep = '\t',header=FALSE)
+
+  emptycols <- sapply(content.table, function (k) all(is.na(k)))
+  content.table <- content.table[!emptycols]
+
+  # Use first row as column headers
+  names(content.table) <- content.table[1,]
+  content.table <- content.table[-1,]
+  # Check if table is malformed
+  if (is.character(content.table) ||
+      is.null(content.table) ||
+      is.na(content.table) ||
+      ncol(content.table) != 7) {
+    return(NA)
+  }
+
+  return(content.table)
+}
+
+

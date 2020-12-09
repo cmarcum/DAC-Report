@@ -37,7 +37,7 @@ All NIH Studies Table, for table schema see [link](https://www.ncbi.nlm.nih.gov/
 `get.study.summary.table()`
 Returns a summary dataframe of all DAC which had DAR approved in the given timeframe. See documentation for table schema.
 
-`dar.review.timeline.summary()`
+`get.dar.review.timeline.summary.table()`
 Returns a summary dataframe of all studies made in the given timeframe. Note that some studies can be both approved and rejected (ex. approved but later rejected ), or neither (still in process of approval) so it isn't necessary that Total Request = Approval + Reject. See documentation for table schema
 
 For a complete list of all available tables, see files under the R/ directory and their associated documentation.

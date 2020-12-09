@@ -20,7 +20,11 @@ Imports:
     lubridate,
     bookdown,
     ggplot2,
-    httr
+    httr,
+    tm,
+    wordcloud,
+    RColorBrewer,
+    plotly
 Depends: 
     R (>= 2.10)
 Roxygen: list(markdown = TRUE)

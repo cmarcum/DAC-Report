@@ -6,17 +6,22 @@
 \usage{
 dac.data.update.all(
   update.to = format(Sys.Date(), "\%m/\%d/\%Y"),
-  wait.for = 2
+  wait.for = 2,
+  skip.gs = TRUE
 )
 }
 \arguments{
 \item{update.to}{String, date in 'yyyy-mm-dd' format. The date to update the data to}
 
 \item{wait.for}{number, seconds to wait for before sending another request to retrieve phs study}
+
+\item{skip.gs}{logical, whether to skip updating the gs_citation_table}
 }
 \description{
 Updates every table that are locally stored in the package. Including
-the nih_dac_actions_table and the all_nih_dac_studies_table
+the nih_dac_actions_table and the all_nih_dac_studies_table. The
+gs_citation_table is skipped by default for long update time but can be
+enabled as a parameter
 }
 \examples{
 \dontrun{

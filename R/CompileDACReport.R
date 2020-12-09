@@ -12,7 +12,9 @@
 #' in which the analysis will be based on
 #' @param end.date String, date in "yyyy-mm-dd" format, the end date of the timeframe in
 #' which the analysis will be based on
+#' @param doc.type String, defaults to be "docx", use "html" to create an interactie html report instead
 #' @param ... extra arguments to be provided to rmarkdown::render
+#'
 #'
 #' @return NULL
 #'
@@ -21,7 +23,7 @@
 #' }
 #'
 #' @export
-compile.dac.report <- function(dac, author, start.date, end.date,...) {
+compile.dac.report <- function(dac, author, start.date, end.date,doc.type="docx",...) {
   all_nih_dac_studies_table <- get.all.nih.dac.studies.table()
   nih_dac_action_table <- get.nih.dac.action.table()
   # Markdown template to use
@@ -33,10 +35,24 @@ compile.dac.report <- function(dac, author, start.date, end.date,...) {
   dac.specific.action.table <- nih_dac_action_table[nih_dac_action_table["DAC"] == dac,]
 
   print('Computing Review Timelime Summary Table...')
-  timeline.summary.table <- dar.review.timeline.summary(start.date,end.date)
+  timeline.summary.table <- get.dar.review.timeline.summary.table(start.date,end.date)
 
   print('Computing Study Summary Table...')
   study.summary.table <- get.study.summary.table(start.date,end.date)
+  google.scholar.citation.table <- get.google.scholar.citation.table()
+  study.summary.table <- merge(study.summary.table,google.scholar.citation.table,by.x = 'StudyAccesion',by.y = 'phs_id',all.x = TRUE)
+
+  print("Computing Top Study Term Frequency Table...")
+  dac.study.summary.table <- study.summary.table[study.summary.table['DAC'] == dac,]
+  dac.study.summary.table <- get.df.within.range(dac.study.summary.table,start.date,end.date,"Study Release Date")
+  dac.study.summary.table.ordered <- dac.study.summary.table[order(-dac.study.summary.table$TotalRequest),]
+  if (nrow(dac.study.summary.table.ordered) == 0) {
+    phs.popular.this.dac <- NA
+    top.study.term.freq.table <- NA
+  } else {
+    phs.popular.this.dac <- dac.study.summary.table.ordered[1,]['StudyAccesion']$StudyAccesion
+    top.study.term.freq.table <- get.phs.study.term.frequency.table(phs.popular.this.dac)
+  }
 
   print('Computing Monthly Study Status Table...')
   study.status.table.all <- get.monthly.study.status.table('2000-01-01',Sys.Date())
@@ -53,22 +69,38 @@ compile.dac.report <- function(dac, author, start.date, end.date,...) {
 
   print('All tables calculated. Rendering...')
 
-  rmarkdown::render(this.file, params = list(
-  title = title,
-  start.date = start.date,
-  end.date = end.date,
-  author = author,
-  dac=dac,
-  nih.dac.action.table=nih_dac_action_table,
-  timeline.summary.table=timeline.summary.table,
-  study.summary.table=study.summary.table,
-  study.status.table.all=study.status.table.all,
-  study.status.table.dac=study.status.table.dac,
-  pi.requests.table.overall=pi.requests.table.overall,
-  pi.requests.table.selected.time=pi.requests.table.selected.time,
-  approval.time.diff.table=approval.time.diff.table
-   ),...)
+  doc.params <- list(
+    title = title,
+    start.date = start.date,
+    end.date = end.date,
+    author = author,
+    dac=dac,
+    nih.dac.action.table=nih_dac_action_table,
+    timeline.summary.table=timeline.summary.table,
+    study.summary.table=study.summary.table,
+    top.study.term.freq.table=top.study.term.freq.table,
+    study.status.table.all=study.status.table.all,
+    study.status.table.dac=study.status.table.dac,
+    pi.requests.table.overall=pi.requests.table.overall,
+    pi.requests.table.selected.time=pi.requests.table.selected.time,
+    approval.time.diff.table=approval.time.diff.table,
+    doc.type=doc.type
+  )
 
-  shell.exec(system.file("report.docx", package="DACReportingTool"))
+  if (doc.type == "html") {
+    rmarkdown::render(this.file,
+                      params = doc.params,
+                      output_format = rmarkdown::html_document(),
+                      ...)
+    shell.exec(system.file("report.html", package="DACReportingTool"))
+  }
+
+  if (doc.type == "docx") {
+    rmarkdown::render(this.file,
+                      params = doc.params,
+                      output_format = bookdown::word_document2(),
+                      ...)
+    shell.exec(system.file("report.docx", package="DACReportingTool"))
+  }
 
 }

@@ -46,6 +46,17 @@ get.multi.row.span.table <- function(table.url,xpath){
   return(table)
 }
 
+# Helper functions that grabs and clean tables from the DataUseSummary.cgi page
+get.data.use.summary.table <- function(request.url,table.xpath) {
+  big.df <- get.multi.row.span.table(request.url,table.xpath)
+  # Use first row as column headers
+  names(big.df) <- big.df[1,]
+  big.df <- big.df[-1,]
+  # remove beginning and trailing white spaces
+  clean.df <- as.data.frame(apply(big.df,2,trimws,which="both"))
+  return(clean.df)
+}
+
 # Produce subset of df that falls within the given time range
 get.df.within.range <- function(df,start.date,end.date,date.col="Approved by DAC") {
   return(subset(df, as.Date(df[,date.col], format="%m/%d/%Y") >= start.date & as.Date(df[,date.col], format="%m/%d/%Y") <= end.date))
@@ -83,6 +94,19 @@ get.latest.approved.dar.date <- function() {
   return(cur.table.latest)
 }
 
+# Gets all uunique study ids stored in the local dac action table
+get.all.unique.studies.ids <- function() {
+  df <- get.nih.dac.action.table()
+  return(unique(df['Study accesion'])$`Study accesion`)
+}
+
+# Min max normalize the gievn vector
 min_max_norm <- function(x) {
   (x - min(x)) / (max(x) - min(x))
+}
+
+# Extracts the phs number in string without version number
+extract.phs <- function(phs.id) {
+  phs.num <- regmatches(phs.id,regexpr('.+?(?=\\.)',phs.id, perl = TRUE))
+  return(phs.num)
 }
