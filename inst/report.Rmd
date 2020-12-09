@@ -232,7 +232,12 @@ if (nrow(dac.study.summary.table.ordered) == 0) {
 
 ```
 
-During this reporting period, `r new.studies.released` new studies were released by `r dac` through dbGaP.  A total of `r new.studies.dar` DARs were made for these newly released studies. Study `r phs.popular.this.dac` (`r phs.popular.this.dac.study.name`) was the most requested dataset from the `r dac` DAC with `r phs.popular.this.dac.total.request` requests.  The following word-cloud provides a graphical summary of the combined research use statements (RUS) from all DARs requesting this study. The larger the word appears in the wordcloud, the more frequent the word in the set of RUS.
+```{r include=FALSE}
+word.cloud.description <- if (!is.na(top.study.term.freq.table)) "The following word-cloud provides a graphical summary of the combined research use statements (RUS) from all DARs requesting this study. The larger the word appears in the wordcloud, the more frequent the word in the set of RUS." else ""
+```
+
+
+During this reporting period, `r new.studies.released` new studies were released by `r dac` through dbGaP.  A total of `r new.studies.dar` DARs were made for these newly released studies. Study `r phs.popular.this.dac` (`r phs.popular.this.dac.study.name`) was the most requested dataset from the `r dac` DAC with `r phs.popular.this.dac.total.request` requests. `r word.cloud.description`
 
 ```{r include=FALSE}
 study.released.fig.cap <- sprintf("Number of Study Released by %s Per Month Since 2015", dac)
@@ -293,7 +298,7 @@ if (nrow(dac.study.summary.table.ordered.by.citation) > 5) {
 }
 ```
 
-```{r fig.cap=most.cited.fig.cap, echo=FALSE, fig.align="center"}
+```{r fig.cap=most.cited.fig.cap, echo=FALSE,warning=FALSE, message=FALSE, fig.align="center"}
   show.legend <- doc.type=="docx"
   cited.plot <- ggplot(data=cited.df, aes(x = StudyID, y = Citations, fill = StudyName)) +
     geom_bar(stat="identity",show.legend = show.legend) +
@@ -310,6 +315,7 @@ if (nrow(dac.study.summary.table.ordered.by.citation) > 5) {
   if (params$doc.type == "docx") {
     cited.plot <- cited.plot +
       theme(legend.position = "bottom") +
+      ylim(c(0,max(cited.df$Citations) * 1.1)) +
       guides(fill = guide_legend(nrow = 6,title.position="top", title.hjust = 0.5))
     cited.plot 
   }
