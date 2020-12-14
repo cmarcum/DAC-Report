@@ -39,6 +39,8 @@ request.google.scholar.result.count <- function(term,start.year='',end.year='') 
 #'
 #' @param phs.id.list list of phs.id
 #' @param wait.for integer, seconds to wait for before sending another request
+#' @param ignore.version logical, defaults to false whether only the phs number should be used instead
+#' of the full id which contains version numbers
 #'
 #' @return dataframe
 #' @export
@@ -46,14 +48,17 @@ request.google.scholar.result.count <- function(term,start.year='',end.year='') 
 #' @examples \dontrun{
 #' df <- get.nih.dac.action.table()
 #' unique.study.ids <- unique(df['Study accesion'])$`Study accesion`
-#' gs.df <- request.google.scholar.citation.table(unique.study.ids,2)
+#' gs_citation_table <- request.google.scholar.citation.table(unique.study.ids,2)
 #' }
-request.google.scholar.citation.table <- function(phs.id.list,wait.for=2){
+request.google.scholar.citation.table <- function(phs.id.list,wait.for=2,ignore.version=FALSE){
   citation.list <- list()
   for (i in 1:length(phs.id.list)) {
-    phs.id.no.version <- extract.phs(phs.id.list[[i]])
-    print(sprintf("Retrieving Google Scholar Citation Data for %s",phs.id.no.version))
-    citation.list[[i]] <- request.google.scholar.result.count(phs.id.no.version)
+    phs.id <- phs.id.list[[i]]
+    if (ignore.version) {
+      phs.id <- extract.phs(phs.id)
+    }
+    print(sprintf("Retrieving Google Scholar Citation Data for %s [%s/%s]",phs.id,i,length(phs.id.list)))
+    citation.list[[i]] <- request.google.scholar.result.count(phs.id)
     Sys.sleep(wait.for)
   }
   d <- data.frame(I(phs.id.list), I(citation.list))
