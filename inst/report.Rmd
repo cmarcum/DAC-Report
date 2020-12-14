@@ -292,13 +292,13 @@ if (nrow(dac.study.summary.table.ordered.by.citation) > 5) {
                          Citations = citation.count
                          )
   
-  # cited.df <- cited.df[order(cited.df$Citations,decreasing = TRUE),]
   cited.df$StudyID <- factor(cited.df$StudyID,
                                        levels=unique(as.character(cited.df$StudyID)))
 }
 ```
 
 ```{r fig.cap=most.cited.fig.cap, echo=FALSE,warning=FALSE, message=FALSE, fig.align="center"}
+if (nrow(dac.study.summary.table.ordered.by.citation) > 5) {
   show.legend <- doc.type=="docx"
   cited.plot <- ggplot(data=cited.df, aes(x = StudyID, y = Citations, fill = StudyName)) +
     geom_bar(stat="identity",show.legend = show.legend) +
@@ -319,6 +319,7 @@ if (nrow(dac.study.summary.table.ordered.by.citation) > 5) {
       guides(fill = guide_legend(nrow = 6,title.position="top", title.hjust = 0.5))
     cited.plot 
   }
+}
 ```
 
 
