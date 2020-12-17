@@ -115,6 +115,7 @@ approval.time.from.PI.to.SO.plot <- ggplot(approval.time.diff.table, aes(factor(
   geom_boxplot(outlier.shape = NA) + 
   coord_cartesian(ylim = ylim1*1.05) +
   scale_y_continuous(n.breaks = 8) +
+  scale_x_discrete(labels = format(sort(unique(approval.time.diff.table$ApprovedMonth)),"%m/%Y")) +
   stat_summary(fun=median, colour="cornflowerblue", aes(y=ApprovalTimeFromPIToSO,group=1),
                geom="line", group=1, size=2) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
@@ -141,6 +142,7 @@ approval.time.from.SO.to.DAC.plot <- ggplot(approval.time.diff.table, aes(factor
   geom_boxplot(outlier.shape = NA) + 
   coord_cartesian(ylim = ylim2*1.05) +
   scale_y_continuous(n.breaks = 8) +
+  scale_x_discrete(labels = format(sort(unique(approval.time.diff.table$ApprovedMonth)),"%m/%Y")) +
   stat_summary(fun=median, colour="cornflowerblue", aes(y=ApprovalTimeFromSOToDAC,group=1),
                geom="line", group=1, size=2) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
@@ -165,7 +167,7 @@ ylim3 <- c(0,max(approval.time.top.ylims$ApprovalTimeFromPIToDAC))
 
 approval.time.from.PI.to.DAC.plot <- ggplot(approval.time.diff.table, aes(factor(ApprovedMonth), ApprovalTimeFromPIToDAC)) + geom_boxplot(outlier.shape = NA) + 
   coord_cartesian(ylim = ylim3*1.05) +
-  # scale_x_discrete(labels = format(as.Date(approval.time.diff.table$ApprovedMonth), "%m/%Y")) +
+  scale_x_discrete(labels = format(sort(unique(approval.time.diff.table$ApprovedMonth)),"%m/%Y")) +
   scale_y_continuous(n.breaks = 8) +
   stat_summary(fun=median, colour="cornflowerblue", aes(y=ApprovalTimeFromPIToDAC,group=1),
                geom="line", group=1, size=2) +
