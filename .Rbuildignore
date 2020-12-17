@@ -4,3 +4,4 @@
 ^\./notebook-examples$
 ^\./csv_to_download$
 ^\./inst/report\.docx$
+^\./presentations$
