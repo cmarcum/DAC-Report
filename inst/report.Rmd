@@ -115,6 +115,7 @@ approval.time.from.PI.to.SO.plot <- ggplot(approval.time.diff.table, aes(factor(
   geom_boxplot(outlier.shape = NA) + 
   coord_cartesian(ylim = ylim1*1.05) +
   scale_y_continuous(n.breaks = 8) +
+  scale_x_discrete(labels = format(sort(unique(approval.time.diff.table$ApprovedMonth)),"%m/%Y")) +
   stat_summary(fun=median, colour="cornflowerblue", aes(y=ApprovalTimeFromPIToSO,group=1),
                geom="line", group=1, size=2) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
@@ -141,6 +142,7 @@ approval.time.from.SO.to.DAC.plot <- ggplot(approval.time.diff.table, aes(factor
   geom_boxplot(outlier.shape = NA) + 
   coord_cartesian(ylim = ylim2*1.05) +
   scale_y_continuous(n.breaks = 8) +
+  scale_x_discrete(labels = format(sort(unique(approval.time.diff.table$ApprovedMonth)),"%m/%Y")) +
   stat_summary(fun=median, colour="cornflowerblue", aes(y=ApprovalTimeFromSOToDAC,group=1),
                geom="line", group=1, size=2) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
@@ -165,7 +167,7 @@ ylim3 <- c(0,max(approval.time.top.ylims$ApprovalTimeFromPIToDAC))
 
 approval.time.from.PI.to.DAC.plot <- ggplot(approval.time.diff.table, aes(factor(ApprovedMonth), ApprovalTimeFromPIToDAC)) + geom_boxplot(outlier.shape = NA) + 
   coord_cartesian(ylim = ylim3*1.05) +
-  # scale_x_discrete(labels = format(as.Date(approval.time.diff.table$ApprovedMonth), "%m/%Y")) +
+  scale_x_discrete(labels = format(sort(unique(approval.time.diff.table$ApprovedMonth)),"%m/%Y")) +
   scale_y_continuous(n.breaks = 8) +
   stat_summary(fun=median, colour="cornflowerblue", aes(y=ApprovalTimeFromPIToDAC,group=1),
                geom="line", group=1, size=2) +
@@ -199,8 +201,8 @@ current.dac.pi.average.dac <- round(mean(current.dac.pi.table$DAC),2)
 current.dac.pi.average.project <- round(mean(current.dac.pi.table$Project),2)
 ```
 
-Between `r start.date` and `r end.date`, `r length(pi.submitted.to.current.dac.selected.time)` PIs have submitted DAR to studies released by `r dac`. Among these PIs, `r current.dac.pi.submit.to.more.than.one.dac` have also submitted DAR to studies released by other DACs. PIs who submitted DARs to `r dac` also
-submits, on average, `r current.dac.pi.average.dar` DARs to all DACs for `r current.dac.pi.average.project` projects.
+Between `r start.date` and `r end.date`, `r length(pi.submitted.to.current.dac.selected.time)` PIs have submitted DARs for studies released by `r dac`. Among these PIs, `r current.dac.pi.submit.to.more.than.one.dac` have also submitted DARs for studies released by other DACs. PIs who submitted DARs to `r dac` also
+submit, on average, `r current.dac.pi.average.dar` DARs to all DACs for `r current.dac.pi.average.project` projects.
 
 # Study Released
 
@@ -236,12 +238,11 @@ if (nrow(dac.study.summary.table.ordered) == 0) {
 word.cloud.description <- if (!is.na(top.study.term.freq.table)) "The following word-cloud provides a graphical summary of the combined research use statements (RUS) from all DARs requesting this study. The larger the word appears in the wordcloud, the more frequent the word in the set of RUS." else ""
 ```
 
-
 During this reporting period, `r new.studies.released` new studies were released by `r dac` through dbGaP.  A total of `r new.studies.dar` DARs were made for these newly released studies. Study `r phs.popular.this.dac` (`r phs.popular.this.dac.study.name`) was the most requested dataset from the `r dac` DAC with `r phs.popular.this.dac.total.request` requests. `r word.cloud.description`
 
 ```{r include=FALSE}
-study.released.fig.cap <- sprintf("Number of Study Released by %s Per Month Since 2015", dac)
-word.cloud.fig.cap <- sprintf("Word cloud of Research Statements for Study %s (%s)",phs.popular.this.dac,phs.popular.this.dac.study.name)
+study.released.fig.cap <- sprintf("Number of Studies Released by %s Per Month Since 2015", dac)
+word.cloud.fig.cap <- sprintf("Wordcloud of Cumulative Research Statements for DARs Requesting Study %s (%s)",phs.popular.this.dac,phs.popular.this.dac.study.name)
 ```
 
 ```{r fig.cap=word.cloud.fig.cap, echo=FALSE, warning=FALSE ,message=FALSE, fig.align="center"}
@@ -270,7 +271,7 @@ if (nrow(dac.study.summary.table.ordered.by.citation) > 0) {
 
 ```
 
-According to Google Scholar, the most cited study during this time period is `r most.cited.study.id` (`r most.cited.study.name`) with `r most.cited.study.count` citations.
+According to a simple query on Google Scholar searching for all PHS numbers of studies referenced in publications, the most cited study during this time period is `r most.cited.study.id` (`r most.cited.study.name`) with `r most.cited.study.count` citations. Note that this is a crude estimate as not all papers published using dbGaP data actually make reference to the study accession number. 
 
 ```{r include=FALSE}
 most.cited.fig.cap <- sprintf("Top 5 Studies Managed by %s with Most Google Scholar Citations Between %s and %s", dac,params$start.date,params$end.date)
@@ -340,8 +341,9 @@ if (params$doc.type == "docx") {
 ```
 
 
-# Other Comparisons
+# Appendix: Other Comparisons
 
+The following figures are supplemental to the full report and are provided out of convenience. 
 
 ```{r include=FALSE}
 dual.y.fig.caption <- sprintf("Comparison of Cummulative Requests Received and Studies Released by %s", dac)
